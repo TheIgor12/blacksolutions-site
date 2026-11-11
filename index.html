@@ -24,7 +24,7 @@ header{position:sticky;top:0;z-index:20;background:#0a0820d9;backdrop-filter:blu
 .hero{padding:90px 0 50px;text-align:center}.hero .eye{display:inline-block;padding:6px 14px;border:1px solid #4a4590;border-radius:30px;color:var(--mut);font-size:13px;font-weight:700;margin-bottom:18px}
 .hero h1{font-size:clamp(36px,5.4vw,64px);line-height:1.08;margin:0 0 18px;font-weight:800}.hero h1 span{background:linear-gradient(90deg,var(--v1),var(--v2),var(--v3));-webkit-background-clip:text;background-clip:text;color:transparent}
 .hero p{color:var(--mut);font-size:19px;max-width:760px;margin:0 auto 28px}.hero .acts{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:40px 0 20px}
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:40px 0 20px}.precos{margin-top:50px;align-items:stretch}.precos .preco{margin:0;max-width:none;display:flex;flex-direction:column}.precos .preco p{flex:1 1 auto;margin-bottom:18px}.precos .pbt{margin-top:auto;display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 .pc{border-radius:20px;padding:26px;border:1px solid var(--line);background:linear-gradient(160deg,#1c1850,#120f33);display:flex;gap:16px;align-items:center;text-decoration:none}
 .pc img{width:64px;height:64px;border-radius:16px;object-fit:cover}.pc h3{margin:0;font-size:22px}.pc p{margin:2px 0 0;color:var(--mut);font-size:14px}
 .pc.lex{background:linear-gradient(160deg,#2a1f0c,#120f33);border-color:#6b5426}.pc.lex h3{font-family:"Playfair Display",Georgia,serif;color:var(--gold2)}
@@ -59,7 +59,7 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-siz
  <h1>Sistemas que <span>organizam o seu trabalho</span> do primeiro atendimento ao último cálculo.</h1>
  <p>O <b>BlackFlow</b> cuida da gestão de clínicas de podologia, estética e salões de beleza. O <b>Lex Calc</b> faz cálculos jurídicos e tributários com índices oficiais. Os dois funcionam pela internet, no computador e no celular, com tudo salvo na nuvem.</p>
  <div class="acts"><a class="btn bv" href="#produtos" onclick="aba('bf')">Ver as telas do BlackFlow</a><a class="btn bg" href="#produtos" onclick="aba('lx')">Ver as telas do Lex Calc</a></div>
- <div class="duo"><a class="pc" href="https://blackflow.app.br"><img src="img/blackflow-icone.png" alt=""><div><h3>BlackFlow</h3><p>Gestão de clínicas e salões · R$ 79,99 por mês</p></div></a><a class="pc lex" href="https://lexcalc.app.br"><img src="img/lexcalc-icone.png" alt=""><div><h3>Lex Calc</h3><p>Cálculos jurídicos, procurações e contratos · R$ 29,90 por mês</p></div></a></div>
+ <div class="duo"><a class="pc" href="https://blackflow.app.br"><img src="img/blackflow-icone.png" alt=""><div><h3>BlackFlow</h3><p>Gestão de clínicas e salões · a partir de R$ 29,90 por mês</p></div></a><a class="pc lex" href="https://lexcalc.app.br"><img src="img/lexcalc-icone.png" alt=""><div><h3>Lex Calc</h3><p>Cálculos jurídicos, procurações e contratos · R$ 29,90 por mês</p></div></a></div>
 </div>
 
 <div class="w" id="produtos">
@@ -69,7 +69,11 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-siz
   <div class="intro"><h2>BlackFlow por dentro</h2><p>Veja cada tela do sistema e para que ela serve. Tudo o que aparece aqui vem no plano único, sem módulo extra para pagar.</p>
    <a class="btn bv" href="https://blackflow.app.br">Abrir o BlackFlow</a> <a class="btn bo" href="https://blackflow.app.br/download/BlackFlow_Instalador.exe">Baixar para Windows</a> <a class="btn bo" href="https://blackflow.app.br/download/BlackFlow_Mac_AppleSilicon.dmg">Baixar para Mac</a></div>
   <div class="grade" id="gbf"></div>
-  <div class="preco"><span style="color:var(--mut);font-weight:700">Plano único, com tudo incluso</span><b>R$ 79,99 por mês</b><p>Os 100 primeiros assinantes mantêm esse valor sem reajuste enquanto a assinatura estiver ativa. Teste grátis por 14 dias.</p><a class="btn bv" href="https://blackflow.app.br">Começar o teste grátis</a> <a class="btn bo" href="https://blackflow.app.br/download/Manual_BlackFlow.pdf" target="_blank">Manual em PDF</a></div>
+  <div class="duo precos">
+   <div class="preco"><span style="color:var(--mut);font-weight:700">Só agenda</span><b>R$ 29,90 por mês</b><p>Para quem quer apenas a agenda: horários por profissional, cadastro de clientes, serviços e preços, confirmação pelo WhatsApp e agendamento online. Pensado para manicure, pedicure, barbearia, estúdio de unhas, cílios, massagem e qualquer profissional que trabalhe com hora marcada.</p><div class="pbt"><a class="btn bv" href="https://blackflow.app.br">Começar o teste grátis</a></div></div>
+   <div class="preco"><span style="color:var(--mut);font-weight:700">Completo</span><b>R$ 79,99 por mês</b><p>Tudo o que o seu negócio usa: agenda, financeiro com parcelas e recibo, comanda, caixa do dia, estoque, comissões, relatórios e os módulos do seu segmento. Os 100 primeiros assinantes mantêm esse valor sem reajuste enquanto a assinatura estiver ativa.</p><div class="pbt"><a class="btn bv" href="https://blackflow.app.br">Começar o teste grátis</a> <a class="btn bo" href="https://blackflow.app.br/download/Manual_BlackFlow.pdf" target="_blank">Manual em PDF</a></div></div>
+  </div>
+  <p style="text-align:center;color:var(--mut);margin:14px 0 0">Teste grátis por 14 dias nos dois planos. Dá para trocar de plano dentro do sistema, sem perder nada do que já foi lançado.</p>
  </div>
 
  <div class="painel lexp" id="plx">
