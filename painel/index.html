@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel BlackSolutions</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0a0820">
+<link rel="icon" href="/favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0820;--bg2:#120f33;--card:#17143d;--line:#2e2a66;--txt:#f4f3ff;--mut:#b7b3e0;--v1:#7b5cff;--v2:#00d1ff;--gold:#f2c264;--ok:#25d366;--bad:#ff6b7a;--warn:#ffb86b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans","Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+.glow{position:fixed;inset:0;pointer-events:none;z-index:0;background:radial-gradient(600px 400px at 10% 0%,#7b5cff30,transparent 70%),radial-gradient(600px 400px at 95% 10%,#00d1ff25,transparent 70%)}
+header,main{position:relative;z-index:1}
+.w{max-width:1180px;margin:0 auto;padding:0 18px}
+header{position:sticky;top:0;z-index:20;background:#0a0820e6;backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;gap:14px;height:64px;flex-wrap:wrap}
+.brand{font-weight:800;font-size:19px;text-decoration:none}.brand b{background:linear-gradient(90deg,var(--v1),var(--v2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.chip{font-size:12px;font-weight:800;color:var(--gold);border:1px solid #6b5426;background:#f2c2641a;border-radius:20px;padding:3px 10px}
+.nav .dir{margin-left:auto;display:flex;align-items:center;gap:10px}
+.quem{color:var(--mut);font-size:13px}
+button{font:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;border-radius:12px;padding:11px 18px;border:1px solid transparent;cursor:pointer;background:linear-gradient(90deg,var(--v1),var(--v2));color:#fff}
+.btn:disabled{opacity:.55;cursor:default}
+.btn2{background:#ffffff0d;border:1px solid #4a4590;color:#fff;border-radius:11px;padding:9px 15px;font-weight:700;cursor:pointer}
+.btn3{background:transparent;border:1px solid var(--line);color:var(--mut);border-radius:10px;padding:7px 13px;font-size:13px;font-weight:700;cursor:pointer}
+.btn2:hover,.btn3:hover{background:#ffffff14;color:#fff}
+.abas{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0 18px}
+.aba{border:1px solid var(--line);background:#ffffff08;color:var(--mut);font-weight:700;font-size:15px;padding:10px 18px;border-radius:12px;cursor:pointer}
+.aba.on{color:#fff;background:linear-gradient(90deg,var(--v1),var(--v2));border-color:transparent}
+.aba .n{display:inline-block;margin-left:7px;font-size:12px;background:#0006;border-radius:20px;padding:1px 8px}
+.painel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;margin-bottom:18px}
+.painel h2{margin:0 0 4px;font-size:20px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 14px}
+.rec{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding:13px 0;border-bottom:1px solid #ffffff10}
+.rec:last-child{border-bottom:0}
+.rec .e{flex:1;min-width:230px}.rec .d{min-width:190px;text-align:right}
+.selo{display:inline-block;font-size:11px;font-weight:800;border-radius:20px;padding:2px 9px;background:#ffffff14;color:var(--mut);vertical-align:middle}
+.selo.ok{color:#0b2d18;background:var(--ok)}.selo.bad{color:#3a0c12;background:var(--bad)}.selo.warn{color:#3a2502;background:var(--warn)}
+.selo.bf{color:#fff;background:linear-gradient(90deg,var(--v1),var(--v2))}.selo.lx{color:#2a1a02;background:linear-gradient(90deg,#ffe3a1,#e2a43c)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.ct{border:1px solid var(--line);border-radius:14px;padding:16px;background:#ffffff06}
+.ct .k{color:var(--mut);font-size:13px;font-weight:700}.ct .v{font-size:30px;font-weight:800;line-height:1.2}
+.ct .x{color:var(--mut);font-size:13px}
+.f{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.f label{color:var(--mut);font-size:13px;font-weight:700}
+input,select{background:#0c0a26;border:1px solid var(--line);color:var(--txt);border-radius:11px;padding:11px 13px;font:inherit;width:100%}
+input:focus,select:focus{outline:0;border-color:var(--v1)}
+.lin{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.aviso{border-radius:12px;padding:12px 14px;margin:12px 0;font-size:14px;border:1px solid}
+.aviso.bad{border-color:#6b2430;background:#ff6b7a18;color:#ffc7cd}
+.aviso.ok{border-color:#1f6a47;background:#25d36618;color:#bff0d2}
+.aviso.neutro{border-color:var(--line);background:#ffffff08;color:var(--mut)}
+.login{max-width:410px;margin:12vh auto;padding:30px;background:var(--card);border:1px solid var(--line);border-radius:20px}
+.login h1{margin:0 0 4px;font-size:24px}
+.vazio{color:var(--mut);font-size:14px;padding:10px 0}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1c1850;border:1px solid var(--line);color:#fff;padding:12px 20px;border-radius:12px;z-index:60;box-shadow:0 10px 30px #0008;font-weight:600;max-width:90vw}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+@media(max-width:700px){.lin{grid-template-columns:1fr}.rec .d{text-align:left;min-width:0}}
+</style>
+</head>
+<body>
+<div class="glow"></div>
+<div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SB=supabase.createClient('https://blszdbjpxgtloblxlusr.supabase.co','sb_publishable_0Tns_mDN2N1iQmw_sEzFXw_SRMy1uXK');
+const P={sessao:null,mestre:null,aba:'resumo',msg:'',erro:false,carregando:false,email:'',
+ resumo:null,contas:null,conect:null,audit:null,pagtos:null,ident:null,
+ auditDias:30,busca:''};
+const $=s=>document.querySelector(s);
+const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const n=v=>Number(v||0);
+const br=d=>{const s=String(d||'').slice(0,10);return /^\d{4}-\d{2}-\d{2}$/.test(s)?s.slice(8,10)+'/'+s.slice(5,7)+'/'+s.slice(0,4):''};
+const dinheiro=v=>'R$ '+n(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function quando(t){if(!t)return 'nunca';const d=new Date(t),ag=new Date();const min=Math.floor((ag-d)/60000);
+ if(min<1)return 'agora';if(min<60)return 'há '+min+' min';
+ const h=Math.floor(min/60);if(h<24)return 'há '+h+(h===1?' hora':' horas');
+ return d.toLocaleDateString('pt-BR')+' às '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}
+function mascDoc(v){const d=String(v||'').replace(/[^0-9A-Za-z]/g,'').toUpperCase();
+ if(d.length===11)return d.slice(0,3)+'.'+d.slice(3,6)+'.'+d.slice(6,9)+'-'+d.slice(9);
+ if(d.length===14)return d.slice(0,2)+'.'+d.slice(2,5)+'.'+d.slice(5,8)+'/'+d.slice(8,12)+'-'+d.slice(12);
+ return d}
+let toastT=null;
+function toast(t){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';e.className='toast';document.body.appendChild(e)}
+ e.textContent=t;clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),4200)}
+function erroSql(e){const m=String((e&&e.message)||e||'');
+ if(/permission denied|row-level security/i.test(m))return 'O banco recusou. Este login não é o mestre.';
+ if(/does not exist|schema cache/i.test(m))return 'Esta parte ainda não foi criada no banco de dados.';
+ return m||'Não foi possível concluir.'}
+
+/* ---------- entrada ---------- */
+async function entrar(ev){if(ev)ev.preventDefault();
+ const email=$('#l_email').value.trim(),senha=$('#l_senha').value;
+ P.email=email;
+ if(!email||!senha){P.msg='Informe e-mail e senha.';P.erro=true;render();return}
+ P.msg='Entrando...';P.erro=false;render();
+ const {data,error}=await SB.auth.signInWithPassword({email,password:senha});
+ if(error){P.msg=/invalid/i.test(error.message)?'E-mail ou senha incorretos.':error.message;P.erro=true;render();return}
+ P.sessao=data.session;P.msg='';await conferirMestre()}
+async function conferirMestre(){P.mestre=null;render();
+ try{const {data,error}=await SB.rpc('lm_e_mestre');P.mestre=!error&&data===true}catch(e){P.mestre=false}
+ render();if(P.mestre)carregar('resumo')}
+async function sair(){await SB.auth.signOut();P.sessao=null;P.mestre=null;
+ P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=null;render()}
+
+/* ---------- carregamento por aba ---------- */
+async function carregar(aba,forcar){P.aba=aba;
+ const ja={resumo:P.resumo,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident}[aba];
+ if(ja!==null&&ja!==undefined&&!forcar){render();return}
+ P.carregando=true;render();
+ try{
+  if(aba==='resumo'){
+   const a=await SB.rpc('bs_painel');P.resumo=a.error?{erro:erroSql(a.error)}:(a.data||[]);
+   if(P.contas===null){const b=await SB.rpc('bs_painel_contas');if(!b.error)P.contas=b.data||[]}}
+  if(aba==='contas'){const b=await SB.rpc('bs_painel_contas');P.contas=b.error?{erro:erroSql(b.error)}:(b.data||[])}
+  if(aba==='conectados'){const c=await SB.rpc('bs_conectados');P.conect=c.error?{erro:erroSql(c.error)}:(c.data||[])}
+  if(aba==='auditoria'){const d=await SB.rpc('bs_auditoria',{p_escritorio:null,p_dias:P.auditDias,p_limite:300});P.audit=d.error?{erro:erroSql(d.error)}:(d.data||[])}
+  if(aba==='pagamentos'){const e=await SB.rpc('bs_pagamentos_pendentes');P.pagtos=e.error?{erro:erroSql(e.error)}:(e.data||[])}
+  if(aba==='identidades'){const f=await SB.from('bs_identidades').select('*').order('criado_em',{ascending:false}).limit(300);
+   P.ident=f.error?{erro:erroSql(f.error)}:(f.data||[])}
+ }catch(e){toast(erroSql(e))}
+ P.carregando=false;render()}
+async function darPrazo(id,nome){if(!confirm('Dar mais dias de teste para '+nome+'?'))return;
+ const {data,error}=await SB.rpc('bs_conceder_prazo',{p_clinica:id,p_dias:null});
+ if(error){toast(erroSql(error));return}
+ toast('Prazo estendido até '+br(data));carregar('contas',true)}
+async function vincular(idPag){const cl=prompt('Cole o identificador da clínica (o campo id da aba Contas):');
+ if(!cl)return;
+ const {error}=await SB.rpc('bs_vincular_pagamento',{p_pagamento:idPag,p_clinica:cl.trim(),p_dias:30});
+ if(error){toast(erroSql(error));return}
+ toast('Pagamento vinculado e prazo somado.');carregar('pagamentos',true)}
+function buscar(v){P.busca=v;render()}
+function mudarDias(v){P.auditDias=parseInt(v,10)||30;carregar('auditoria',true)}
+
+/* ---------- telas ---------- */
+function vLogin(){return `<div class="login">
+ <h1>Painel BlackSolutions</h1>
+ <p class="sub">Área do administrador. Entre com o seu login mestre.</p>
+ <form onsubmit="entrar(event)">
+  <div class="f"><label>E-mail</label><input id="l_email" type="email" autocomplete="email" value="${esc(P.email)}"></div>
+  <div class="f"><label>Senha</label><input id="l_senha" type="password" autocomplete="current-password"></div>
+  ${P.msg?`<div class="aviso ${P.erro?'bad':'neutro'}">${esc(P.msg)}</div>`:''}
+  <button class="btn" style="width:100%">Entrar</button>
+ </form></div>`}
+function vNaoMestre(){return `<div class="login">
+ <h1>Acesso restrito</h1>
+ <p class="sub">Esta área é do login mestre da BlackSolutions. A sua conta entrou, mas não tem essa permissão.</p>
+ <div class="aviso neutro">Se você é cliente, use o BlackFlow em <b>blackflow.app.br</b> ou o Lex Calc em <b>lexcalc.app.br</b>.</div>
+ <button class="btn2" style="width:100%" onclick="sair()">Sair</button></div>`}
+function cabecalho(){const e=(P.sessao&&P.sessao.user&&P.sessao.user.email)||'';
+ return `<header><div class="w nav">
+  <a class="brand" href="/">Black<b>Solutions</b></a><span class="chip">PAINEL MESTRE</span>
+  <div class="dir"><span class="quem">${esc(e)}</span><button class="btn3" onclick="sair()">Sair</button></div>
+ </div></header>`}
+function abas(){const L=[['resumo','Resumo'],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
+  ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length]];
+ return `<div class="abas">${L.map(([k,t,q])=>`<button class="aba ${P.aba===k?'on':''}" onclick="carregar('${k}')">${t}${q?`<span class="n">${q}</span>`:''}</button>`).join('')}</div>`}
+function caixaErro(o){return `<div class="aviso bad">${esc(o.erro)}</div>`}
+function vResumo(){const R=P.resumo;
+ if(!R)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(R.erro)return '<div class="painel"><h2>Resumo</h2>'+caixaErro(R)+'</div>';
+ const C=Array.isArray(P.contas)?P.contas:[];
+ const pedidos=C.filter(x=>x.pedido_prazo);
+ const jaPediu=new Set(pedidos.map(x=>x.id));
+ const vencem=C.filter(x=>x.sistema==='BlackFlow'&&x.dias_restantes!=null&&x.dias_restantes>=0&&x.dias_restantes<=3&&!jaPediu.has(x.id));
+ const bloco=r=>`<div class="painel"><h2>${esc(r.sistema)}</h2>
+  <div class="cards">
+   <div class="ct"><div class="k">Pessoas cadastradas</div><div class="v">${n(r.contas)}</div><div class="x">${n(r.negocios)} ${n(r.negocios)===1?'negócio':'negócios'}</div></div>
+   <div class="ct"><div class="k">Entraram</div><div class="v">${n(r.trinta_dias)}</div><div class="x">em 30 dias · ${n(r.sete_dias)} em 7 · ${n(r.hoje)} hoje</div></div>
+   ${r.sistema==='BlackFlow'?`<div class="ct"><div class="k">Pagando</div><div class="v" style="color:var(--ok)">${n(r.pagantes)}</div><div class="x">${n(r.em_teste)} em teste · ${n(r.vencidos)} vencidos</div></div>`:''}
+  </div></div>`;
+ return R.map(bloco).join('')
+  +(pedidos.length?`<div class="painel"><h2>Pediram mais prazo <span class="selo warn">${pedidos.length}</span></h2>
+    <p class="sub">Pedidos ainda não atendidos.</p>${pedidos.map(linhaConta).join('')}</div>`:'')
+  +(vencem.length?`<div class="painel"><h2>Vencem em até 3 dias <span class="selo warn">${vencem.length}</span></h2>
+    <p class="sub">Hora de falar com essas pessoas antes do teste acabar.</p>${vencem.map(linhaConta).join('')}</div>`:'')}
+function linhaConta(r){const d=r.dias_restantes;
+ const st=r.sistema!=='BlackFlow'||d==null?'':(d<0?`<span class="selo bad">vencido há ${-d} dia${-d===1?'':'s'}</span>`
+  :d<=3?`<span class="selo warn">${d} dia${d===1?'':'s'}</span>`:`<span class="selo">${d} dias</span>`);
+ const doc=r.documento||r.cpf_responsavel||r.cnpj||'';
+ return `<div class="rec">
+  <div class="e"><b>${esc(r.nome||'sem nome')}</b> <span class="selo ${r.sistema==='BlackFlow'?'bf':'lx'}">${esc(r.sistema)}</span>${r.pedido_prazo?' <span class="selo warn">pediu prazo</span>':''}
+   <br><small class="sub">${esc(r.email||'sem e-mail')}${r.criado_em?' · entrou em '+br(r.criado_em):''}</small>
+   ${r.razao_social?`<br><small class="sub">${esc(r.razao_social)}</small>`:''}
+   ${doc?`<br><small class="sub mono">${esc(mascDoc(doc))}</small>`:''}
+   <br><small class="sub mono" style="opacity:.5">${esc(r.id||'')}</small></div>
+  <div class="d"><small class="sub">${r.plano?esc(r.plano)+'<br>':''}</small>${st}
+   ${r.sistema==='BlackFlow'?`<br><button class="btn3" style="margin-top:6px" onclick="darPrazo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Dar mais dias</button>`:''}</div></div>`}
+function vContas(){const C=P.contas;
+ if(!C)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(C.erro)return '<div class="painel"><h2>Contas</h2>'+caixaErro(C)+'</div>';
+ const b=P.busca.toLowerCase().replace(/[^0-9a-zà-ÿ ]/gi,'');
+ const L=b?C.filter(x=>((x.nome||'')+' '+(x.email||'')+' '+(x.razao_social||'')+' '+(x.documento||'')).toLowerCase().includes(b)):C;
+ return `<div class="painel"><h2>Contas nos dois sistemas <span class="selo">${C.length}</span></h2>
+  <p class="sub">Cada negócio cadastrado, com o responsável, o plano e o prazo. O código cinza embaixo é o identificador, usado para vincular pagamento.</p>
+  <div class="f"><input placeholder="Procurar por nome, e-mail, razão social ou documento" value="${esc(P.busca)}" oninput="buscar(this.value)"></div>
+  ${L.length?L.map(linhaConta).join(''):'<p class="vazio">Nada encontrado.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('contas',true)">Atualizar</button></div></div>`}
+function vConectados(){const C=P.conect;
+ if(!C)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(C.erro)return '<div class="painel"><h2>Quem está conectado</h2>'+caixaErro(C)+'</div>';
+ const on=C.filter(x=>x.online);
+ const linha=x=>`<div class="rec">
+  <div class="e"><b>${esc(x.email||'sem e-mail')}</b> ${x.online?'<span class="selo ok">conectado</span>':''}
+   <br><small class="sub">${x.escritorio?esc(x.escritorio):'sem escritório'}${x.tela?' · em '+esc(x.tela):''}</small></div>
+  <div class="d"><small class="sub">${x.online?'visto '+quando(x.visto_em):'última entrada '+quando(x.ultimo_acesso)}<br>conta criada em ${br(x.criado_em)}</small></div></div>`;
+ return `<div class="painel"><h2>Quem está conectado <span class="selo ${on.length?'ok':''}">${on.length}</span></h2>
+  <p class="sub">Conta como conectado quem usou o sistema nos últimos cinco minutos. A lista mostra também quem entrou por último.</p>
+  ${C.length?C.slice(0,60).map(linha).join(''):'<p class="vazio">Ninguém ainda.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('conectados',true)">Atualizar</button></div></div>`}
+function vAuditoria(){const A=P.audit;
+ if(!A)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(A.erro)return '<div class="painel"><h2>O que aconteceu</h2>'+caixaErro(A)+'</div>';
+ const linha=x=>`<div class="rec">
+  <div class="e"><b>${esc(x.acao)}</b>${x.detalhe?'<br><small class="sub">'+esc(x.detalhe)+'</small>':''}</div>
+  <div class="d"><small class="sub">${esc(x.email||'')}<br>${x.escritorio?esc(x.escritorio)+' · ':''}${quando(x.quando)}</small></div></div>`;
+ return `<div class="painel"><h2>O que aconteceu</h2>
+  <p class="sub">Entrada no sistema, documento gerado, convite, troca de equipe e cálculo salvo.</p>
+  <div class="aviso neutro">O registro vem sem nome de cliente e sem número de processo. Esse detalhe fica com o escritório, que é o controlador dos dados dele. Para saber quem fez o quê e quando, o resumo basta.</div>
+  <div class="f" style="max-width:280px"><label>Período</label>
+   <select onchange="mudarDias(this.value)">${[[7,'últimos 7 dias'],[30,'últimos 30 dias'],[90,'últimos 90 dias'],[365,'último ano']].map(([v,t])=>`<option value="${v}" ${P.auditDias===v?'selected':''}>${t}</option>`).join('')}</select></div>
+  ${A.length?A.map(linha).join(''):'<p class="vazio">Nada registrado neste período.</p>'}</div>`}
+function vPagamentos(){const G=P.pagtos;
+ if(!G)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(G.erro)return '<div class="painel"><h2>Pagamentos sem dono</h2>'+caixaErro(G)+'</div>';
+ const linha=x=>`<div class="rec">
+  <div class="e"><b>${dinheiro(x.valor)}</b> <span class="selo">${esc(x.descricao||'sem descrição')}</span>
+   <br><small class="sub">${esc(x.nome||'sem nome')} · ${esc(x.email||'sem e-mail')}${x.documento?' · '+esc(mascDoc(x.documento)):''}</small>
+   <br><small class="sub">recebido ${quando(x.recebido_em)}${x.observacao?' · '+esc(x.observacao):''}</small></div>
+  <div class="d"><button class="btn3" onclick="vincular(${n(x.id)})">Vincular a uma conta</button></div></div>`;
+ return `<div class="painel"><h2>Pagamentos sem dono <span class="selo ${G.length?'warn':''}">${G.length}</span></h2>
+  <p class="sub">Pagamentos que chegaram do Asaas e o sistema não conseguiu ligar sozinho a nenhuma conta, em geral porque o cliente pagou com outro e-mail. Vincular soma 30 dias ao prazo da conta escolhida.</p>
+  ${G.length?G.map(linha).join(''):'<p class="vazio">Nenhum pagamento pendente. É o que se espera.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('pagamentos',true)">Atualizar</button></div></div>`}
+function vIdentidades(){const I=P.ident;
+ if(!I)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(I.erro)return '<div class="painel"><h2>Documentos que já usaram teste</h2>'+caixaErro(I)+'</div>';
+ const b=P.busca.replace(/[^0-9A-Za-z]/g,'').toUpperCase();
+ const L=b?I.filter(x=>String(x.documento||'').includes(b)||String(x.email||'').toUpperCase().includes(b)||String(x.razao||'').toUpperCase().includes(b)):I;
+ const ver=v=>{if(!v)return '';
+  if(v.consulta==='falhou')return '<span class="selo warn">consulta falhou</span>';
+  const at=/ativa/i.test(v.situacao||'');
+  return `<span class="selo ${at?'ok':'bad'}">${esc(v.situacao||'sem situação')}</span>`};
+ const linha=x=>`<div class="rec">
+  <div class="e"><b class="mono">${esc(mascDoc(x.documento))}</b> <span class="selo">${esc(x.tipo)}</span> ${ver(x.verificacao)}
+   ${x.razao?`<br><small class="sub">${esc(x.razao)}</small>`:''}
+   <br><small class="sub">${esc(x.email||'')}${x.verificacao&&x.verificacao.municipio?' · '+esc(x.verificacao.municipio)+(x.verificacao.uf?'/'+esc(x.verificacao.uf):''):''}</small></div>
+  <div class="d"><small class="sub">${quando(x.criado_em)}</small></div></div>`;
+ return `<div class="painel"><h2>Documentos que já usaram teste <span class="selo">${I.length}</span></h2>
+  <p class="sub">Cada CPF e cada CNPJ que abriu teste grátis. Esta lista sobrevive à exclusão da conta, e é o que impede a mesma pessoa de abrir cadastro atrás de cadastro.</p>
+  <div class="aviso neutro">O CPF é conferido só nos dígitos verificadores, porque a Receita Federal não tem consulta aberta de CPF. O CNPJ é verificado de verdade contra os dados abertos do cadastro, e o selo colorido mostra a situação que voltou.</div>
+  <div class="f"><input placeholder="Procurar por documento, e-mail ou razão social" value="${esc(P.busca)}" oninput="buscar(this.value)"></div>
+  ${L.length?L.map(linha).join(''):'<p class="vazio">Nenhum documento registrado ainda.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('identidades',true)">Atualizar</button></div></div>`}
+function vPainel(){const V={resumo:vResumo,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades}[P.aba]||vResumo;
+ return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
+function render(){
+ if(!P.sessao){$('#app').innerHTML=vLogin();const f=$(P.email?'#l_senha':'#l_email');if(f)f.focus();return}
+ if(P.mestre===null){$('#app').innerHTML=cabecalho()+'<main class="w"><div class="painel"><p class="sub">Conferindo a permissão...</p></div></main>';return}
+ if(!P.mestre){$('#app').innerHTML=vNaoMestre();return}
+ $('#app').innerHTML=vPainel()}
+(async function inicio(){
+ const {data}=await SB.auth.getSession();
+ if(data&&data.session){P.sessao=data.session;await conferirMestre()}else render()
+})();
+</script>
+</body>
+</html>
