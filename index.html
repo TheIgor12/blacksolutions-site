@@ -11,11 +11,34 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 <style>
-.bfx{background:radial-gradient(520px 200px at 82% 0%,rgba(241,57,206,.45),transparent 72%),linear-gradient(104deg,#140b33,#02010f);border-bottom:1px solid rgba(255,255,255,.1);padding:11px 16px}
-.bfx .in{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;text-align:center}
-.bfx .et{font-size:10.5px;font-weight:800;letter-spacing:.17em;text-transform:uppercase;padding:4px 11px;border-radius:999px;background:linear-gradient(96deg,#1b86fb,#7f22fd 52%,#f139ce);color:#fff;white-space:nowrap}
-.bfx p{margin:0;font-size:14px;color:#efecff;font-weight:600}.bfx p b{color:#fff}
-.bfx a{font-size:13px;font-weight:800;color:#02010f;background:#fff;padding:7px 15px;border-radius:999px;text-decoration:none;white-space:nowrap}
+.bfx{position:relative;overflow:hidden;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.12);
+ background:linear-gradient(104deg,#16093a,#02010f 55%,#1a0633)}
+.bfx::before{content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(100deg,transparent 35%,rgba(255,255,255,.22) 50%,transparent 65%);
+ background-size:260% 100%;animation:bfvar 3.4s linear infinite}
+.bfx::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;
+ background:linear-gradient(90deg,#1b86fb,#7f22fd,#f139ce,#7f22fd,#1b86fb);background-size:300% 100%;animation:bffita 4s linear infinite}
+@keyframes bfvar{0%{background-position:160% 0}100%{background-position:-60% 0}}
+@keyframes bffita{0%{background-position:0 0}100%{background-position:300% 0}}
+@keyframes bfpisca{0%,54%{opacity:1}57%,63%{opacity:.25}66%,100%{opacity:1}}
+@keyframes bfpulsa{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.bfx .in{position:relative;z-index:1;max-width:1180px;margin:0 auto;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;text-align:center}
+.bfx .et{font-size:11px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;padding:5px 13px;border-radius:999px;
+ background:linear-gradient(96deg,#1b86fb,#7f22fd 52%,#f139ce);color:#fff;white-space:nowrap;
+ box-shadow:0 0 22px rgba(241,57,206,.65);animation:bfpisca 2.6s ease-in-out infinite}
+.bfx p{margin:0;font-size:14.5px;color:#efecff;font-weight:600}
+.bfx p b{color:#fff}
+.bfx .de{color:#8f88b8;text-decoration:line-through;font-weight:600;margin-right:2px}
+.bfx .por{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:#fff;
+ background:linear-gradient(96deg,#4aa6ff,#c06bff 50%,#ff6ad9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.bfx .vg{font-size:12px;font-weight:700;color:#efecff;padding:4px 11px;border-radius:999px;
+ background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.18);white-space:nowrap}
+.bfx .vg b{color:#ff8ae0}
+.bfx a.cta{font-size:13.5px;font-weight:800;color:#12062b;background:#fff;padding:8px 17px;border-radius:999px;
+ text-decoration:none;white-space:nowrap;animation:bfpulsa 2.2s ease-in-out infinite}
+.bfx a.cta:hover{background:#f0eaff;animation:none}
+@media(prefers-reduced-motion:reduce){.bfx::before,.bfx .et,.bfx a.cta,.bfx::after{animation:none}}
+@media(max-width:700px){.bfx p{font-size:13px}.bfx .por{font-size:17px}.bfx .in{gap:9px}}
 :root{--bg:#0a0820;--bg2:#120f33;--card:#17143d;--line:#2e2a66;--txt:#f4f3ff;--mut:#b7b3e0;--v1:#5a4cfb;--v2:#1b86fb;--v3:#f139ce;--gold:#f2c264;--gold2:#ffe3a1;--green:#25d366}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--txt);font-family:"Plus Jakarta Sans","Segoe UI",Roboto,Arial,sans-serif;line-height:1.6}
 a{color:inherit}img{max-width:100%;height:auto;display:block}
@@ -59,9 +82,12 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-siz
 <script src="/cliques.js" defer></script></head>
 <body>
 <div class="glow"></div>
-<div class="bfx"><div class="in"><span class="et">Black Friday</span>
-<p>BlackFlow completo por <b>R$ 59,90 por mês</b> nos 6 primeiros meses. Primeiras <b>50 clínicas</b>, até 30/11.</p>
-<a href="https://blackflow.app.br/sobre/#planos">Ver a promoção</a></div></div>
+<div class="bfx"><div class="in">
+ <span class="et">Black Friday</span>
+ <p>BlackFlow completo <span class="de">R$ 79,90</span> <span class="por">R$ 59,90</span> por mês, nos 6 primeiros meses.</p>
+ <span class="vg">só <b id="bfVagas">100</b> vagas · até 30/11</span>
+ <a class="cta" href="https://blackflow.app.br/sobre/#planos">Quero a minha vaga</a>
+</div></div>
 <header><div class="w nav"><a class="brand" href="#">Black<b>Solutions</b></a><nav><a href="#produtos" onclick="aba('bf')">BlackFlow</a><a href="#produtos" onclick="aba('lx')">Lex Calc</a><a href="#suporte">Suporte</a></nav><a class="btn bw" href="https://wa.me/5547988432859?text=Ol%C3%A1!%20Quero%20saber%20mais%20sobre%20a%20BlackSolutions." target="_blank" rel="noopener">WhatsApp</a></div></header>
 <main>
 <div class="w hero"><span class="eye">Software brasileiro, feito em Jaraguá do Sul</span>
@@ -141,6 +167,18 @@ monta('gbf',BF);monta('glx',LX);
 function aba(k){document.getElementById('pbf').classList.toggle('on',k==='bf');document.getElementById('plx').classList.toggle('on',k==='lx');document.getElementById('tbf').classList.toggle('on',k==='bf');const t=document.getElementById('tlx');t.classList.toggle('on',k==='lx');t.classList.toggle('lexon',k==='lx')}
 function z(src){const e=document.getElementById('zoom');e.querySelector('img').src=src;e.classList.add('on')}
 if(location.hash==='#lexcalc')aba('lx');
+</script>
+
+<script>
+/* As vagas restantes vem do assinatura.json, o mesmo arquivo que o sistema le,
+   para nao haver dois numeros diferentes no ar. */
+fetch('https://raw.githubusercontent.com/TheIgor12/blacksolutions/main/assinatura.json',{cache:'no-store'})
+ .then(r=>r.json()).then(j=>{const p=j&&j.promocao;const faixa=document.querySelector('.bfx');if(!p)return;
+  const livre=Math.max(0,(+p.vagas||0)-(+p.usadas||0));
+  const fim=p.ate?new Date(p.ate+'T23:59:59'):null;
+  if(!p.ativa||livre<=0||(fim&&fim<new Date())){if(faixa)faixa.remove();return}
+  const el=document.getElementById('bfVagas');if(el)el.textContent=livre;
+ }).catch(()=>{});
 </script>
 </body>
 </html>
