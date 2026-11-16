@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Painel BlackSolutions</title>
 <meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src https://blszdbjpxgtloblxlusr.supabase.co wss://blszdbjpxgtloblxlusr.supabase.co; base-uri 'none'; form-action 'self'; object-src 'none'">
 <meta name="theme-color" content="#0a0820">
 <link rel="icon" href="/favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -59,18 +61,22 @@ input:focus,select:focus{outline:0;border-color:var(--v1)}
 .vazio{color:var(--mut);font-size:14px;padding:10px 0}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1c1850;border:1px solid var(--line);color:#fff;padding:12px 20px;border-radius:12px;z-index:60;box-shadow:0 10px 30px #0008;font-weight:600;max-width:90vw}
 .mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}.filtros .btn3.on{color:#fff;border-color:var(--v1);background:#7b5cff22}
+.btnperigo{background:#ff6b7a1f;border:1px solid #6b2430;color:#ffc7cd;border-radius:10px;padding:7px 13px;font-size:13px;font-weight:800;cursor:pointer}
+.btnperigo:hover{background:#ff6b7a33}
+.qr{background:#fff;border-radius:14px;padding:12px;width:220px;height:220px;display:block;margin:10px auto}
 @media(max-width:700px){.lin{grid-template-columns:1fr}.rec .d{text-align:left;min-width:0}}
 </style>
 </head>
 <body>
 <div class="glow"></div>
 <div id="app"></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js" integrity="sha384-0w2KAL2YHP6wKOkUDzkCDGgVvfmHnj02DHeQ6XcHOgTfFsGyonKOpShMH1x6nk9o" crossorigin="anonymous"></script>
 <script>
 const SB=supabase.createClient('https://blszdbjpxgtloblxlusr.supabase.co','sb_publishable_0Tns_mDN2N1iQmw_sEzFXw_SRMy1uXK');
 const P={sessao:null,mestre:null,aba:'resumo',msg:'',erro:false,carregando:false,email:'',
  resumo:null,contas:null,conect:null,audit:null,pagtos:null,ident:null,
- auditDias:30,busca:''};
+ auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos'};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number(v||0);
@@ -88,6 +94,7 @@ let toastT=null;
 function toast(t){let e=$('#toast');if(!e){e=document.createElement('div');e.id='toast';e.className='toast';document.body.appendChild(e)}
  e.textContent=t;clearTimeout(toastT);toastT=setTimeout(()=>e.remove(),4200)}
 function erroSql(e){const m=String((e&&e.message)||e||'');
+ if(/segundo fator/i.test(m)){P.aal='precisa';setTimeout(()=>{conferirFator().then(render)},0)}
  if(/permission denied|row-level security/i.test(m))return 'O banco recusou. Este login não é o mestre.';
  if(/does not exist|schema cache/i.test(m))return 'Esta parte ainda não foi criada no banco de dados.';
  return m||'Não foi possível concluir.'}
@@ -100,22 +107,54 @@ async function entrar(ev){if(ev)ev.preventDefault();
  P.msg='Entrando...';P.erro=false;render();
  const {data,error}=await SB.auth.signInWithPassword({email,password:senha});
  if(error){P.msg=/invalid/i.test(error.message)?'E-mail ou senha incorretos.':error.message;P.erro=true;render();return}
- P.sessao=data.session;P.msg='';await conferirMestre()}
+ P.sessao=data.session;P.msg='';marcarUso();await conferirMestre()}
 async function conferirMestre(){P.mestre=null;render();
  try{const {data,error}=await SB.rpc('lm_e_mestre');P.mestre=!error&&data===true}catch(e){P.mestre=false}
- render();if(P.mestre)carregar('resumo')}
-async function sair(){await SB.auth.signOut();P.sessao=null;P.mestre=null;
- P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=null;render()}
+ if(P.mestre)await conferirFator();
+ render();if(P.mestre&&P.aal==='ok')carregar('resumo')}
+/* Segundo fator: o painel inteiro exige código do aplicativo autenticador.
+   O banco confere a mesma coisa (bs_mestre_forte), então pular esta tela não adianta. */
+async function conferirFator(){P.aal=null;P.mfa=null;
+ try{const a=await SB.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(a.data&&a.data.currentLevel==='aal2'){P.aal='ok';return}
+  const f=await SB.auth.mfa.listFactors();
+  const ver=((f.data&&f.data.totp)||[]).filter(x=>x.status==='verified');
+  if(ver.length){P.aal='precisa';P.mfa={fid:ver[0].id}}else P.aal='cadastrar'}
+ catch(e){P.aal='cadastrar'}}
+async function iniciarCadastroFator(){P.msg='';
+ try{const f=await SB.auth.mfa.listFactors();
+  for(const x of ((f.data&&f.data.all)||[]).filter(x=>x.status!=='verified'))await SB.auth.mfa.unenroll({factorId:x.id});
+  const {data,error}=await SB.auth.mfa.enroll({factorType:'totp',friendlyName:'Painel BlackSolutions'});
+  if(error)throw error;
+  P.mfa={fid:data.id,qr:data.totp.qr_code,secret:data.totp.secret,novo:true}}
+ catch(e){P.msg='Não foi possível iniciar o cadastro do autenticador: '+((e&&e.message)||e);P.erro=true}
+ render()}
+async function confirmarFator(ev){if(ev)ev.preventDefault();
+ const code=String(($('#f_cod')||{}).value||'').replace(/\D/g,'');
+ if(code.length!==6){P.msg='Digite os 6 números do aplicativo.';P.erro=true;render();return}
+ P.msg='Conferindo...';P.erro=false;render();
+ const {error}=await SB.auth.mfa.challengeAndVerify({factorId:P.mfa.fid,code});
+ if(error){P.msg='Código incorreto ou vencido. Espere o próximo código e tente de novo.';P.erro=true;render();return}
+ const s=await SB.auth.getSession();P.sessao=s.data.session;P.msg='';P.aal='ok';P.mfa=null;render();carregar('resumo')}
+/* Sai sozinho depois de 20 minutos sem mexer no painel */
+let ociosoT=null;
+function marcarUso(){clearTimeout(ociosoT);if(P.sessao)ociosoT=setTimeout(()=>{toast('Sessão encerrada por inatividade.');sair()},20*60000)}
+['click','keydown','mousemove','touchstart'].forEach(e=>document.addEventListener(e,marcarUso,{passive:true}));
+async function sair(){try{await SB.auth.signOut()}catch(e){}P.sessao=null;P.mestre=null;P.aal=null;P.mfa=null;
+ P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=P.usuarios=P.hist=null;render()}
 
 /* ---------- carregamento por aba ---------- */
 async function carregar(aba,forcar){P.aba=aba;
- const ja={resumo:P.resumo,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident}[aba];
+ const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident}[aba];
  if(ja!==null&&ja!==undefined&&!forcar){render();return}
  P.carregando=true;render();
  try{
   if(aba==='resumo'){
    const a=await SB.rpc('bs_painel');P.resumo=a.error?{erro:erroSql(a.error)}:(a.data||[]);
-   if(P.contas===null){const b=await SB.rpc('bs_painel_contas');if(!b.error)P.contas=b.data||[]}}
+   if(P.contas===null){const b=await SB.rpc('bs_painel_contas');if(!b.error)P.contas=b.data||[]}
+   if(P.usuarios===null){const u=await SB.rpc('bs_painel_usuarios');if(!u.error)P.usuarios=u.data||[]}}
+  if(aba==='usuarios'){const u=await SB.rpc('bs_painel_usuarios');P.usuarios=u.error?{erro:erroSql(u.error)}:(u.data||[]);
+   const h=await SB.rpc('bs_painel_bloqueios_log',{p_limite:100});P.hist=h.error?{erro:erroSql(h.error)}:(h.data||[])}
   if(aba==='contas'){const b=await SB.rpc('bs_painel_contas');P.contas=b.error?{erro:erroSql(b.error)}:(b.data||[])}
   if(aba==='conectados'){const c=await SB.rpc('bs_conectados');P.conect=c.error?{erro:erroSql(c.error)}:(c.data||[])}
   if(aba==='auditoria'){const d=await SB.rpc('bs_auditoria',{p_escritorio:null,p_dias:P.auditDias,p_limite:300});P.audit=d.error?{erro:erroSql(d.error)}:(d.data||[])}
@@ -133,6 +172,23 @@ async function vincular(idPag){const cl=prompt('Cole o identificador da clínica
  const {error}=await SB.rpc('bs_vincular_pagamento',{p_pagamento:idPag,p_clinica:cl.trim(),p_dias:30});
  if(error){toast(erroSql(error));return}
  toast('Pagamento vinculado e prazo somado.');carregar('pagamentos',true)}
+const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+function acharUsuario(id){return Array.isArray(P.usuarios)?P.usuarios.find(x=>x.user_id===id):null}
+async function derrubar(id){const u=acharUsuario(id);if(!u||!UUID.test(id))return;
+ const motivo=prompt('Motivo para derrubar o acesso de '+u.email+'.\nExemplo: teste vencido sem pagamento.');
+ if(motivo===null)return;
+ if(motivo.trim().length<5){toast('Escreva o motivo, com pelo menos cinco letras.');return}
+ if(!confirm('Derrubar o acesso de '+u.email+'?\n\nA pessoa sai na hora de todos os aparelhos, não consegue entrar de novo e a clínica dela fica desativada. Os dados continuam guardados. Você pode restaurar depois.'))return;
+ const {error}=await SB.rpc('bs_derrubar_acesso',{p_user:id,p_motivo:motivo.trim()});
+ if(error){toast(erroSql(error));return}
+ toast('Acesso derrubado.');P.resumo=null;carregar('usuarios',true)}
+async function restaurar(id){const u=acharUsuario(id);if(!u||!UUID.test(id))return;
+ const motivo=prompt('Motivo para restaurar o acesso de '+u.email+' (opcional). Exemplo: pagou por Pix.');
+ if(motivo===null)return;
+ const {error}=await SB.rpc('bs_restaurar_acesso',{p_user:id,p_motivo:motivo.trim()||null});
+ if(error){toast(erroSql(error));return}
+ toast('Acesso restaurado.');P.resumo=null;carregar('usuarios',true)}
+function filtrarU(f){P.filtroU=f;render()}
 function buscar(v){P.busca=v;render()}
 function mudarDias(v){P.auditDias=parseInt(v,10)||30;carregar('auditoria',true)}
 
@@ -146,6 +202,22 @@ function vLogin(){return `<div class="login">
   ${P.msg?`<div class="aviso ${P.erro?'bad':'neutro'}">${esc(P.msg)}</div>`:''}
   <button class="btn" style="width:100%">Entrar</button>
  </form></div>`}
+function vFator(){
+ const caixa=P.msg?`<div class="aviso ${P.erro?'bad':'neutro'}">${esc(P.msg)}</div>`:'';
+ if(P.aal==='cadastrar'&&!(P.mfa&&P.mfa.novo))return `<div class="login">
+  <h1>Proteja o painel</h1>
+  <p class="sub">O painel mostra documentos e permite derrubar acessos. Por isso ele exige, além da senha, um código de 6 números do aplicativo autenticador do seu celular (Google Authenticator, Microsoft Authenticator ou similar).</p>
+  ${caixa}<button class="btn" style="width:100%" onclick="iniciarCadastroFator()">Cadastrar o autenticador</button>
+  <button class="btn3" style="width:100%;margin-top:10px" onclick="sair()">Sair</button></div>`;
+ const novo=P.mfa&&P.mfa.novo;
+ return `<div class="login">
+  <h1>${novo?'Leia o QR Code':'Código do autenticador'}</h1>
+  <p class="sub">${novo?'Abra o aplicativo autenticador, toque em adicionar e aponte a câmera para o código abaixo. Depois digite os 6 números que aparecerem.':'Digite os 6 números que aparecem agora no seu aplicativo autenticador.'}</p>
+  ${novo?`<img class="qr" alt="QR Code do autenticador" src="${esc(P.mfa.qr)}"><p class="sub" style="text-align:center">Se a câmera não ler, digite esta chave no aplicativo:<br><b class="mono">${esc(P.mfa.secret)}</b></p>`:''}
+  <form onsubmit="confirmarFator(event)">
+   <div class="f"><label>Código</label><input id="f_cod" inputmode="numeric" autocomplete="one-time-code" maxlength="6"></div>
+   ${caixa}<button class="btn" style="width:100%">Confirmar</button></form>
+  <button class="btn3" style="width:100%;margin-top:10px" onclick="sair()">Sair</button></div>`}
 function vNaoMestre(){return `<div class="login">
  <h1>Acesso restrito</h1>
  <p class="sub">Esta área é do login mestre da BlackSolutions. A sua conta entrou, mas não tem essa permissão.</p>
@@ -156,7 +228,7 @@ function cabecalho(){const e=(P.sessao&&P.sessao.user&&P.sessao.user.email)||'';
   <a class="brand" href="/">Black<b>Solutions</b></a><span class="chip">PAINEL MESTRE</span>
   <div class="dir"><span class="quem">${esc(e)}</span><button class="btn3" onclick="sair()">Sair</button></div>
  </div></header>`}
-function abas(){const L=[['resumo','Resumo'],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
+function abas(){const L=[['resumo','Resumo'],['usuarios','Usuários',Array.isArray(P.usuarios)&&P.usuarios.length],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
   ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length]];
  return `<div class="abas">${L.map(([k,t,q])=>`<button class="aba ${P.aba===k?'on':''}" onclick="carregar('${k}')">${t}${q?`<span class="n">${q}</span>`:''}</button>`).join('')}</div>`}
 function caixaErro(o){return `<div class="aviso bad">${esc(o.erro)}</div>`}
@@ -173,11 +245,55 @@ function vResumo(){const R=P.resumo;
    <div class="ct"><div class="k">Entraram</div><div class="v">${n(r.trinta_dias)}</div><div class="x">em 30 dias · ${n(r.sete_dias)} em 7 · ${n(r.hoje)} hoje</div></div>
    ${r.sistema==='BlackFlow'?`<div class="ct"><div class="k">Pagando</div><div class="v" style="color:var(--ok)">${n(r.pagantes)}</div><div class="x">${n(r.em_teste)} em teste · ${n(r.vencidos)} vencidos</div></div>`:''}
   </div></div>`;
- return R.map(bloco).join('')
+ const U=Array.isArray(P.usuarios)?P.usuarios:[];
+ const uso=U.length?`<div class="painel"><h2>Uso agora</h2><div class="cards">
+   <div class="ct"><div class="k">Usando agora</div><div class="v" style="color:var(--ok)">${U.filter(usandoAgora).length}</div><div class="x">nos últimos 15 minutos</div></div>
+   <div class="ct"><div class="k">Usaram hoje</div><div class="v">${U.filter(u=>u.ultimo_uso&&new Date(u.ultimo_uso).toDateString()===new Date().toDateString()).length}</div><div class="x">de ${U.length} contas</div></div>
+   <div class="ct"><div class="k">Vencidos sem pagar</div><div class="v" style="color:var(--bad)">${U.filter(u=>u.situacao==='vencido').length}</div><div class="x">${U.filter(u=>u.situacao==='bloqueado').length} bloqueados</div></div>
+  </div><div style="margin-top:12px"><button class="btn3" onclick="carregar('usuarios')">Ver usuários</button></div></div>`:'';
+ return uso+R.map(bloco).join('')
   +(pedidos.length?`<div class="painel"><h2>Pediram mais prazo <span class="selo warn">${pedidos.length}</span></h2>
     <p class="sub">Pedidos ainda não atendidos.</p>${pedidos.map(linhaConta).join('')}</div>`:'')
   +(vencem.length?`<div class="painel"><h2>Vencem em até 3 dias <span class="selo warn">${vencem.length}</span></h2>
     <p class="sub">Hora de falar com essas pessoas antes do teste acabar.</p>${vencem.map(linhaConta).join('')}</div>`:'')}
+function usandoAgora(u){return !!u.ultimo_uso&&(Date.now()-new Date(u.ultimo_uso))<15*60000}
+function diasTxt(d){d=n(d);return d===0?'hoje':d===1?'há 1 dia':'há '+d+' dias'}
+function linhaUsuario(u){
+ const cor={pago:'ok',cortesia:'ok',mestre:'bf',teste:'warn',vencido:'bad',bloqueado:'bad'}[u.situacao]||'';
+ const sis=(u.sistemas||[]).map(x=>`<span class="selo ${x==='BlackFlow'?'bf':'lx'}">${esc(x)}</span>`).join(' ');
+ const prazo=u.situacao==='pago'&&u.pago_ate?'pago até '+br(u.pago_ate):(u.situacao==='teste'||u.situacao==='vencido')&&u.teste_ate?'teste até '+br(u.teste_ate):'';
+ const podeDerrubar=!u.mestre&&!['pago','cortesia','mestre','bloqueado'].includes(u.situacao);
+ const id=UUID.test(u.user_id||'')?u.user_id:'';
+ return `<div class="rec">
+  <div class="e"><b>${esc(u.email||'sem e-mail')}</b> ${sis} ${usandoAgora(u)?'<span class="selo ok">usando agora</span>':''}
+   ${u.contato&&u.contato!==u.email?`<br><small class="sub">contato: ${esc(u.contato)}</small>`:''}
+   ${u.negocios?`<br><small class="sub">${esc(u.negocios)}</small>`:''}
+   <br><small class="sub">cadastrado ${diasTxt(u.dias_cadastro)} (${br(u.criado_em)}) · último uso ${u.ultimo_uso?quando(u.ultimo_uso):'nunca'}</small>
+   <br><small class="sub">CPF ${u.cpf?'registrado':'não informado'} · celular ${u.telefone?'confirmado':'não confirmado'}</small>
+   ${u.situacao==='bloqueado'?`<br><small class="sub">bloqueado em ${br(u.bloqueado_em)}: ${esc(u.motivo||'')}</small>`:''}</div>
+  <div class="d"><span class="selo ${cor}">${esc(u.situacao)}</span>${prazo?`<br><small class="sub">${prazo}</small>`:''}
+   ${id&&u.situacao==='bloqueado'?`<br><button class="btn3" style="margin-top:6px" data-id="${id}" onclick="restaurar(this.dataset.id)">Restaurar acesso</button>`:''}
+   ${id&&podeDerrubar?`<br><button class="btnperigo" style="margin-top:6px" data-id="${id}" onclick="derrubar(this.dataset.id)">Derrubar acesso</button>`:''}</div></div>`}
+function vUsuarios(){const U=P.usuarios;
+ if(!U)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(U.erro)return '<div class="painel"><h2>Usuários</h2>'+caixaErro(U)+'</div>';
+ const cont=f=>U.filter(f).length;
+ const F={todos:()=>true,agora:usandoAgora,teste:u=>u.situacao==='teste',vencido:u=>u.situacao==='vencido',
+  pago:u=>['pago','cortesia'].includes(u.situacao),bloqueado:u=>u.situacao==='bloqueado'};
+ const b=P.busca.toLowerCase();
+ const L=U.filter(F[P.filtroU]||F.todos).filter(u=>!b||((u.email||'')+' '+(u.contato||'')+' '+(u.negocios||'')).toLowerCase().includes(b));
+ const chip=(k,t)=>`<button class="btn3 ${P.filtroU===k?'on':''}" onclick="filtrarU('${k}')">${t} <b>${cont(F[k])}</b></button>`;
+ const H=P.hist;
+ const hist=!H?'':H.erro?caixaErro(H):H.length?H.map(h=>`<div class="rec"><div class="e"><b>${h.acao==='derrubou'?'Derrubou':'Restaurou'}</b> ${esc(h.email||'')}${h.motivo?'<br><small class="sub">'+esc(h.motivo)+'</small>':''}</div>
+   <div class="d"><small class="sub">${esc(h.feito_por_email||'')}<br>${quando(h.feito_em)}</small></div></div>`).join(''):'<p class="vazio">Nenhum acesso derrubado até agora.</p>';
+ return `<div class="painel"><h2>Usuários <span class="selo">${U.length}</span></h2>
+  <p class="sub">Todas as contas dos dois sistemas: quando se cadastraram, há quantos dias, quando usaram por último e a situação do pagamento. "Usando agora" é quem usou nos últimos 15 minutos.</p>
+  <div class="aviso neutro">Derrubar acesso tira a pessoa de todos os aparelhos na hora, impede novo login e desativa a clínica dela. O banco recusa derrubar conta paga, cortesia ou o login mestre. Cada ação fica no histórico, que não pode ser apagado.</div>
+  <div class="filtros">${chip('todos','Todos')}${chip('agora','Usando agora')}${chip('teste','Em teste')}${chip('vencido','Vencidos')}${chip('pago','Pagos')}${chip('bloqueado','Bloqueados')}</div>
+  <div class="f"><input placeholder="Procurar por e-mail ou nome do negócio" value="${esc(P.busca)}" oninput="buscar(this.value)"></div>
+  ${L.length?L.map(linhaUsuario).join(''):'<p class="vazio">Ninguém nesta lista.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('usuarios',true)">Atualizar</button></div></div>
+  <div class="painel"><h2>Histórico de bloqueios</h2><p class="sub">Quem derrubou ou restaurou, quando e por quê.</p>${hist}</div>`}
 function linhaConta(r){const d=r.dias_restantes;
  const st=r.sistema!=='BlackFlow'||d==null?'':(d<0?`<span class="selo bad">vencido há ${-d} dia${-d===1?'':'s'}</span>`
   :d<=3?`<span class="selo warn">${d} dia${d===1?'':'s'}</span>`:`<span class="selo">${d} dias</span>`);
@@ -256,16 +372,17 @@ function vIdentidades(){const I=P.ident;
   <div class="f"><input placeholder="Procurar por documento, e-mail ou razão social" value="${esc(P.busca)}" oninput="buscar(this.value)"></div>
   ${L.length?L.map(linha).join(''):'<p class="vazio">Nenhum documento registrado ainda.</p>'}
   <div style="margin-top:14px"><button class="btn3" onclick="carregar('identidades',true)">Atualizar</button></div></div>`}
-function vPainel(){const V={resumo:vResumo,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades}[P.aba]||vResumo;
+function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades}[P.aba]||vResumo;
  return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
 function render(){
  if(!P.sessao){$('#app').innerHTML=vLogin();const f=$(P.email?'#l_senha':'#l_email');if(f)f.focus();return}
  if(P.mestre===null){$('#app').innerHTML=cabecalho()+'<main class="w"><div class="painel"><p class="sub">Conferindo a permissão...</p></div></main>';return}
  if(!P.mestre){$('#app').innerHTML=vNaoMestre();return}
+ if(P.aal!=='ok'){$('#app').innerHTML=vFator();const c=$('#f_cod');if(c)c.focus();return}
  $('#app').innerHTML=vPainel()}
 (async function inicio(){
  const {data}=await SB.auth.getSession();
- if(data&&data.session){P.sessao=data.session;await conferirMestre()}else render()
+ if(data&&data.session){P.sessao=data.session;marcarUso();await conferirMestre()}else render()
 })();
 </script>
 </body>
