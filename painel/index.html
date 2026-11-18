@@ -307,7 +307,24 @@ function linhaConta(r){const d=r.dias_restantes;
    ${doc?`<br><small class="sub mono">${esc(mascDoc(doc))}</small>`:''}
    <br><small class="sub mono" style="opacity:.5">${esc(r.id||'')}</small></div>
   <div class="d"><small class="sub">${r.plano?esc(r.plano)+'<br>':''}</small>${st}
-   ${r.sistema==='BlackFlow'?`<br><button class="btn3" style="margin-top:6px" onclick="darPrazo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Dar mais dias</button>`:''}</div></div>`}
+   ${r.sistema==='BlackFlow'?`<br><button class="btn3" style="margin-top:6px" onclick="darPrazo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Dar mais dias</button>
+   <button class="btn3" style="margin-top:6px" onclick="trocarRamo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}','${esc(r.segmento||'')}')">Trocar ramo</button>`:''}</div></div>`}
+/* O ramo trava no sistema do cliente de propósito, porque o preço muda conforme
+   o ramo. A troca passa por aqui, que é o caminho do suporte. */
+const RAMOS=[['podologia','Podologia'],['estetica','Estética'],['beleza','Salão de beleza'],['barbearia','Barbearia']];
+async function trocarRamo(id,nome,atual){
+ const lista=RAMOS.map(([k,n],i)=>`${i+1}. ${n}${k===atual?' (atual)':''}`).join('\n');
+ const esc2=prompt(`Trocar o ramo de ${nome}.\n\n${lista}\n\nDigite o número do ramo novo:`);
+ if(!esc2)return;
+ const i=parseInt(esc2,10)-1;
+ if(!(i>=0&&i<RAMOS.length)){toast('Número inválido.');return}
+ const [k,n]=RAMOS[i];
+ if(k===atual){toast('A conta já está nesse ramo.');return}
+ if(!confirm(`Trocar ${nome} de ${atual||'sem ramo'} para ${n}? Os dados continuam todos lá, só os módulos mudam.`))return;
+ const {error}=await SB.rpc('bs_segmento_trocar',{p_clinica:id,p_segmento:k});
+ if(error){toast(erroSql(error));return}
+ toast(`${nome} agora é ${n}. A pessoa precisa recarregar o sistema para ver.`);
+ carregar('contas',true)}
 function vContas(){const C=P.contas;
  if(!C)return '<div class="painel"><p class="sub">Carregando...</p></div>';
  if(C.erro)return '<div class="painel"><h2>Contas</h2>'+caixaErro(C)+'</div>';
