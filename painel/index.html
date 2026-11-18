@@ -76,7 +76,7 @@ input:focus,select:focus{outline:0;border-color:var(--v1)}
 const SB=supabase.createClient('https://blszdbjpxgtloblxlusr.supabase.co','sb_publishable_0Tns_mDN2N1iQmw_sEzFXw_SRMy1uXK');
 const P={sessao:null,mestre:null,aba:'resumo',msg:'',erro:false,carregando:false,email:'',
  resumo:null,contas:null,conect:null,audit:null,pagtos:null,ident:null,
- auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos'};
+ auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos',promo:null};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number(v||0);
@@ -145,7 +145,7 @@ async function sair(){try{await SB.auth.signOut()}catch(e){}P.sessao=null;P.mest
 
 /* ---------- carregamento por aba ---------- */
 async function carregar(aba,forcar){P.aba=aba;
- const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident}[aba];
+ const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident,promocao:P.promo}[aba];
  if(ja!==null&&ja!==undefined&&!forcar){render();return}
  P.carregando=true;render();
  try{
@@ -159,6 +159,7 @@ async function carregar(aba,forcar){P.aba=aba;
   if(aba==='conectados'){const c=await SB.rpc('bs_conectados');P.conect=c.error?{erro:erroSql(c.error)}:(c.data||[])}
   if(aba==='auditoria'){const d=await SB.rpc('bs_auditoria',{p_escritorio:null,p_dias:P.auditDias,p_limite:300});P.audit=d.error?{erro:erroSql(d.error)}:(d.data||[])}
   if(aba==='pagamentos'){const e=await SB.rpc('bs_pagamentos_pendentes');P.pagtos=e.error?{erro:erroSql(e.error)}:(e.data||[])}
+  if(aba==='promocao'){const g=await SB.rpc('bs_promocao_painel');P.promo=g.error?{erro:erroSql(g.error)}:(g.data||[])}
   if(aba==='identidades'){const f=await SB.from('bs_identidades').select('*').order('criado_em',{ascending:false}).limit(300);
    P.ident=f.error?{erro:erroSql(f.error)}:(f.data||[])}
  }catch(e){toast(erroSql(e))}
@@ -229,7 +230,8 @@ function cabecalho(){const e=(P.sessao&&P.sessao.user&&P.sessao.user.email)||'';
   <div class="dir"><span class="quem">${esc(e)}</span><button class="btn3" onclick="sair()">Sair</button></div>
  </div></header>`}
 function abas(){const L=[['resumo','Resumo'],['usuarios','Usuários',Array.isArray(P.usuarios)&&P.usuarios.length],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
-  ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length]];
+  ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length],
+  ['promocao','Black Friday',Array.isArray(P.promo)&&P.promo.length]];
  return `<div class="abas">${L.map(([k,t,q])=>`<button class="aba ${P.aba===k?'on':''}" onclick="carregar('${k}')">${t}${q?`<span class="n">${q}</span>`:''}</button>`).join('')}</div>`}
 function caixaErro(o){return `<div class="aviso bad">${esc(o.erro)}</div>`}
 function vResumo(){const R=P.resumo;
@@ -372,7 +374,49 @@ function vIdentidades(){const I=P.ident;
   <div class="f"><input placeholder="Procurar por documento, e-mail ou razão social" value="${esc(P.busca)}" oninput="buscar(this.value)"></div>
   ${L.length?L.map(linha).join(''):'<p class="vazio">Nenhum documento registrado ainda.</p>'}
   <div style="margin-top:14px"><button class="btn3" onclick="carregar('identidades',true)">Atualizar</button></div></div>`}
-function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades}[P.aba]||vResumo;
+function msgPromo(r){const nome=String(r.nome||'').split(' ')[0]||'';
+ const fim=br(r.fim),dep=dinheiro(r.depois||79.9),at=dinheiro(r.valor||59.9);
+ const t=r.dias<0
+  ? `Olá, ${nome}. O período promocional do BlackFlow, de ${at} por mês, terminou em ${fim}. A partir de agora a mensalidade é de ${dep} por mês, com todos os recursos liberados, como sempre foi. Qualquer dúvida é só me chamar por aqui.`
+  : `Olá, ${nome}. Passando para avisar com antecedência: o seu preço promocional do BlackFlow, de ${at} por mês, vale até ${fim}. A partir do dia seguinte a mensalidade passa a ser de ${dep} por mês, sem mudar nada no sistema. Não há fidelidade. Qualquer dúvida é só me chamar.`;
+ return t}
+function copiarPromo(id){const r=(P.promo||[]).find(x=>x.id===id);if(!r)return;
+ const t=msgPromo(r);
+ if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(()=>toast('Mensagem copiada.'),()=>toast('Não consegui copiar. Selecione o texto na tela.'))}
+ else toast('Não consegui copiar neste navegador.')}
+async function tirarPromo(id,nome){if(!confirm('Tirar '+nome+' da promoção? O cliente volta a ser tratado como assinante do valor normal.'))return;
+ const {error}=await SB.rpc('bs_promocao_remover',{p_clinica:id});
+ if(error){toast(erroSql(error));return}
+ toast('Cliente fora da promoção.');carregar('promocao',true)}
+function linhaPromo(r){const d=n(r.dias);
+ const st=r.fim==null?'<span class="selo">sem data</span>'
+  :d<0?`<span class="selo bad">terminou há ${-d} dia${-d===1?'':'s'}</span>`
+  :d<=15?`<span class="selo warn">faltam ${d} dia${d===1?'':'s'}</span>`
+  :`<span class="selo ok">faltam ${d} dias</span>`;
+ return `<div class="rec">
+  <div class="e"><b>${esc(r.nome||'sem nome')}</b> <span class="selo bf">${esc(r.codigo||'')}</span>
+   <br><small class="sub">${esc(r.email||'sem e-mail')}</small>
+   <br><small class="sub">entrou em ${br(r.inicio)} · ${dinheiro(r.valor)} por mês até ${br(r.fim)} · depois ${dinheiro(r.depois)}</small>
+   <br><small class="sub mono" style="opacity:.5">${esc(r.id||'')}</small></div>
+  <div class="d">${st}
+   <br><button class="btn3" style="margin-top:6px" onclick="copiarPromo('${esc(r.id)}')">Copiar aviso</button>
+   <button class="btn3" style="margin-top:6px" onclick="tirarPromo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Tirar</button></div></div>`}
+function vPromocao(){const L=P.promo;
+ if(!L)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(L.erro)return '<div class="painel"><h2>Black Friday</h2>'+caixaErro(L)+'</div>';
+ const acabando=L.filter(x=>n(x.dias)>=0&&n(x.dias)<=15).length;
+ const acabou=L.filter(x=>x.fim&&n(x.dias)<0).length;
+ return `<div class="painel"><h2>Black Friday <span class="selo bf">${L.length}</span></h2>
+  <p class="sub">Quem entrou pagando o valor promocional, desde quando, até quando e qual será a mensalidade depois. O aviso ao cliente aparece sozinho dentro do sistema quando faltam trinta dias ou menos. O botão copia a mensagem pronta para mandar no WhatsApp.</p>
+  <div class="cards" style="margin-bottom:16px">
+   <div class="ct"><div class="k">Na promoção</div><div class="v">${L.length}</div><div class="x">de ${L.length?'100':'100'} vagas da oferta</div></div>
+   <div class="ct"><div class="k">Termina em até quinze dias</div><div class="v">${acabando}</div><div class="x">avise antes de cobrar o valor novo</div></div>
+   <div class="ct"><div class="k">Já terminou</div><div class="v">${acabou}</div><div class="x">troque o valor da assinatura no Asaas</div></div>
+  </div>
+  <div class="aviso neutro">Quem cobra é o Asaas. Esta tela controla o prazo e avisa; a troca do valor cobrado continua sendo feita por você, na assinatura do cliente dentro do Asaas.</div>
+  ${L.length?L.map(linhaPromo).join(''):'<p class="vazio">Ninguém na promoção ainda.</p>'}
+  <div style="margin-top:14px"><button class="btn3" onclick="carregar('promocao',true)">Atualizar</button></div></div>`}
+function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao}[P.aba]||vResumo;
  return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
 function render(){
  if(!P.sessao){$('#app').innerHTML=vLogin();const f=$(P.email?'#l_senha':'#l_email');if(f)f.focus();return}
