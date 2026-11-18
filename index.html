@@ -64,12 +64,15 @@ header{position:sticky;top:0;z-index:20;background:#0a0820d9;backdrop-filter:blu
 .intro{text-align:center;max-width:820px;margin:20px auto 34px}.intro h2{font-size:clamp(28px,3.4vw,40px);margin:0 0 10px}.intro p{color:var(--mut);margin:0 0 18px;font-size:17px}
 .lexp .intro h2{font-family:"Playfair Display",Georgia,serif;color:var(--gold2)}
 .grade{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.vid{margin:0 0 26px;background:linear-gradient(180deg,#151235,#0b0920);border:1px solid var(--line);border-radius:18px;padding:16px}
+.vid video{width:100%;display:block;border-radius:12px;background:#000;aspect-ratio:16/9}
+.vid .leg{color:var(--mut);font-size:13px;margin:12px 2px 0;text-align:center}
 .tela{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;display:flex;flex-direction:column}
-.tela .img{background:#0c0a26;cursor:zoom-in;border-bottom:1px solid var(--line);overflow:hidden}.tela .img img{transition:transform .3s}.tela .img:hover img{transform:scale(1.02)}
+.tela .img{background:#0c0a26;cursor:zoom-in;border-bottom:1px solid var(--line);overflow:hidden}.tela .img img{display:block;width:100%;height:auto;aspect-ratio:1440/900;transition:transform .3s;background:#0c0a26}.tela .img:hover img{transform:scale(1.02)}
 .tela .tx{padding:18px 20px 22px}.tela h3{margin:0 0 6px;font-size:19px}.tela p{margin:0;color:var(--mut);font-size:15px}
 .tela .n{display:inline-block;font-size:12px;font-weight:800;color:#fff;background:linear-gradient(90deg,var(--v1),var(--v2));border-radius:20px;padding:2px 10px;margin-bottom:8px}
 .lexp .tela{background:#151225;border-color:#4a3c1e}.lexp .tela .n{background:linear-gradient(90deg,#ffe3a1,#e2a43c);color:#2a1a02}.lexp .tela h3{color:var(--gold2)}
-.tela.cel{grid-row:span 2}.tela.cel .img{display:flex;justify-content:center;padding:18px;background:linear-gradient(160deg,#1c1850,#0c0a26)}.tela.cel .img img{max-height:560px;width:auto;border-radius:22px;border:6px solid #000}
+.tela.cel{grid-row:span 2}.tela.cel .img{display:flex;justify-content:center;align-items:center;flex:1;padding:18px;background:linear-gradient(160deg,#1c1850,#0c0a26)}.tela.cel .img img{width:auto;height:560px;max-height:560px;aspect-ratio:1170/1992;border-radius:22px;border:6px solid #000}
 .preco{margin:50px auto 0;max-width:820px;text-align:center;border-radius:22px;padding:30px;border:1px solid #4a4590;background:linear-gradient(140deg,#7b5cff30,#00d1ff20)}.preco b{font-size:42px;display:block}.preco p{color:var(--mut);margin:6px 0 18px}
 .lexp .preco{border-color:#6b5426;background:linear-gradient(140deg,#f2c26425,#120f33)}
 section.sup{margin:80px 0 40px}.fund{margin:80px 0 0}.fundbox{display:flex;gap:28px;align-items:center;padding:34px;border-radius:24px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(135deg,rgba(124,92,255,.18),rgba(56,189,248,.10))}.fundini{flex:none;width:96px;height:96px;border-radius:50%;display:grid;place-items:center;font:700 34px "Playfair Display",Georgia,serif;color:#fff;background:linear-gradient(135deg,#7c5cff,#ec4899)}.fundtag{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#f0abfc;margin-bottom:6px}.fundbox h2{margin:0 0 10px;font-family:"Playfair Display",Georgia,serif;font-size:30px}.fundbox p{margin:0;opacity:.85;line-height:1.65}@media (max-width:700px){.fundbox{flex-direction:column;text-align:center;padding:24px}}.supbox{display:grid;grid-template-columns:1.2fr 1fr;gap:26px;align-items:center;border-radius:24px;padding:34px;background:linear-gradient(120deg,#0f3d2a,#120f33);border:1px solid #1f6a47}
@@ -77,7 +80,7 @@ section.sup{margin:80px 0 40px}.fund{margin:80px 0 0}.fundbox{display:flex;gap:2
 footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-size:14px}
 .wa{position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px #0009;z-index:30}
 .zoom{position:fixed;inset:0;background:#000d;display:none;align-items:center;justify-content:center;z-index:50;padding:20px;cursor:zoom-out}.zoom.on{display:flex}.zoom img{max-height:92vh;width:auto;border-radius:12px}
-@media (max-width:860px){.duo,.grade,.supbox{grid-template-columns:1fr}.tela.cel{grid-row:auto}.nav nav{display:none}.hero{padding:56px 0 30px}}
+@media (max-width:860px){.duo,.grade,.supbox{grid-template-columns:1fr}.tela.cel{grid-row:auto}.tela.cel .img img{height:auto;max-height:70vh;width:100%;max-width:300px}.nav nav{display:none}.hero{padding:56px 0 30px}}
 </style>
 <script src="/cliques.js" defer></script></head>
 <body>
@@ -103,6 +106,13 @@ footer{border-top:1px solid var(--line);padding:26px 0;color:var(--mut);font-siz
  <div class="painel on" id="pbf">
   <div class="intro"><h2>BlackFlow por dentro</h2><p>Veja cada tela do sistema e para que ela serve. Tudo o que aparece aqui vem no plano Completo. No plano Só agenda ficam a agenda, os clientes, os profissionais, os serviços e preços e a confirmação pelo WhatsApp.</p>
    <a class="btn bv" href="https://blackflow.app.br">Abrir o BlackFlow</a> <a class="btn bo" href="https://blackflow.app.br">Criar conta e testar 7 dias</a></div>
+  <div class="vid">
+   <video controls preload="metadata" poster="https://blackflow.app.br/img/video-capa.jpg" playsinline>
+    <source src="https://blackflow.app.br/download/BlackFlow_como_funciona.mp4" type="video/mp4">
+    O seu navegador não toca este vídeo. <a href="https://blackflow.app.br/download/BlackFlow_como_funciona.mp4">Baixe o arquivo</a> para assistir.
+   </video>
+   <p class="leg">O sistema funcionando, em um minuto e cinquenta e três segundos. Também dá para <a href="https://blackflow.app.br/download/BlackFlow_como_funciona.mp4" download style="color:#8fb8ff;font-weight:700">baixar o vídeo</a>.</p>
+  </div>
   <div class="grade" id="gbf"></div>
   <div class="duo precos">
    <div class="preco"><span style="color:var(--mut);font-weight:700">Só agenda</span><b>R$ 29,90 por mês</b><p>Para quem quer apenas a agenda: horários por profissional, cadastro de clientes, serviços e preços, confirmação pelo WhatsApp e agendamento online. Pensado para manicure, pedicure, barbearia, estúdio de unhas, cílios, massagem e qualquer profissional que trabalhe com hora marcada. O financeiro, o estoque, a comanda e os relatórios ficam fora deste plano, e quem quiser passar para o completo paga só a diferença.</p><div class="pbt"><a class="btn bv" href="https://blackflow.app.br">Começar o teste grátis</a> <a class="btn bo" href="https://blackflow.app.br/download/Manual_BlackFlow.pdf" target="_blank" rel="noopener">Manual em PDF</a></div></div>
@@ -162,7 +172,7 @@ const LX=[
  ['lm_revisao','Revisão antes de gerar','Antes de gerar o PDF, o sistema confere se faltou algum dado obrigatório, como a OAB com UF e o endereço profissional exigidos pelo art. 105 do CPC. A aprovação final fica com o advogado responsável.'],
  ['lm_biblioteca','Biblioteca do escritório','O escritório envia os próprios modelos em Word, de uma área ou de pastas inteiras. O sistema mantém fonte, cabeçalho, rodapé, timbre e marca d\'água, reconhece os campos do cliente, separa os arquivos repetidos e guarda cada nova versão sem alterar os documentos já emitidos.'],
  ['lm_documentos','Documentos e situação','Cada documento salvo tem a sua situação: rascunho, em revisão, aprovado, gerado, aguardando assinatura, assinado, cancelado ou revogação registrada. Dá para abrir, duplicar e filtrar.']];
-function monta(id,L){document.getElementById(id).innerHTML=L.map((t,i)=>`<div class="tela ${t[3]||''}"><div class="img" onclick="z('img/telas/${t[0]}.webp')"><img src="img/telas/${t[0]}.webp" alt="${t[1]}" loading="lazy"></div><div class="tx"><span class="n">${String(i+1).padStart(2,'0')}</span><h3>${t[1]}</h3><p>${t[2]}</p></div></div>`).join('')}
+function monta(id,L){document.getElementById(id).innerHTML=L.map((t,i)=>`<div class="tela ${t[3]||''}"><div class="img" onclick="z('img/telas/${t[0]}.webp')"><img src="img/telas/${t[0]}.webp" alt="${t[1]}" width="${t[0]==='bf_celular'?1170:1440}" height="${t[0]==='bf_celular'?1992:900}" loading="lazy" decoding="async"></div><div class="tx"><span class="n">${String(i+1).padStart(2,'0')}</span><h3>${t[1]}</h3><p>${t[2]}</p></div></div>`).join('')}
 monta('gbf',BF);monta('glx',LX);
 function aba(k){document.getElementById('pbf').classList.toggle('on',k==='bf');document.getElementById('plx').classList.toggle('on',k==='lx');document.getElementById('tbf').classList.toggle('on',k==='bf');const t=document.getElementById('tlx');t.classList.toggle('on',k==='lx');t.classList.toggle('lexon',k==='lx')}
 function z(src){const e=document.getElementById('zoom');e.querySelector('img').src=src;e.classList.add('on')}
