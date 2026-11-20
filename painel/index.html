@@ -164,10 +164,19 @@ async function carregar(aba,forcar){P.aba=aba;
    P.ident=f.error?{erro:erroSql(f.error)}:(f.data||[])}
  }catch(e){toast(erroSql(e))}
  P.carregando=false;render()}
-async function darPrazo(id,nome){if(!confirm('Dar mais dias de teste para '+nome+'?'))return;
- const {data,error}=await SB.rpc('bs_conceder_prazo',{p_clinica:id,p_dias:null});
+async function darPrazo(id,nome){
+ const n=prompt('Quantos dias de voucher conceder para '+nome+'? (1 a 30)','7');
+ if(n===null)return;
+ const dias=Number(n);
+ if(!Number.isInteger(dias)||dias<1||dias>30){toast('Informe de 1 a 30 dias.');return}
+ if(!confirm('Emitir voucher individual de '+dias+' dias para '+nome+'? O acesso só será liberado depois que a clínica resgatar o código.'))return;
+ const {data,error}=await SB.rpc('bs_criar_voucher_blackflow',{p_clinica:id,p_dias:dias,p_validade:null});
  if(error){toast(erroSql(error));return}
- toast('Prazo estendido até '+br(data));carregar('contas',true)}
+ try{await navigator.clipboard.writeText(data)}catch(e){}
+ alert('Voucher gerado para '+nome+':\n\n'+data+'\n\nEnvie este código ao administrador da clínica. O código foi copiado quando permitido pelo navegador.');
+ toast('Voucher emitido, sem liberar acesso automaticamente.');
+ carregar('contas',true);
+}
 async function vincular(idPag){const cl=prompt('Cole o identificador da clínica (o campo id da aba Contas):');
  if(!cl)return;
  const {error}=await SB.rpc('bs_vincular_pagamento',{p_pagamento:idPag,p_clinica:cl.trim(),p_dias:30});
@@ -307,7 +316,7 @@ function linhaConta(r){const d=r.dias_restantes;
    ${doc?`<br><small class="sub mono">${esc(mascDoc(doc))}</small>`:''}
    <br><small class="sub mono" style="opacity:.5">${esc(r.id||'')}</small></div>
   <div class="d"><small class="sub">${r.plano?esc(r.plano)+'<br>':''}</small>${st}
-   ${r.sistema==='BlackFlow'?`<br><button class="btn3" style="margin-top:6px" onclick="darPrazo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Dar mais dias</button>
+   ${r.sistema==='BlackFlow'?`<br><button class="btn3" style="margin-top:6px" onclick="darPrazo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}')">Emitir voucher</button>
    <button class="btn3" style="margin-top:6px" onclick="trocarRamo('${esc(r.id)}','${esc(String(r.nome||'').replace(/'/g,''))}','${esc(r.segmento||'')}')">Trocar ramo</button>`:''}</div></div>`}
 /* O ramo trava no sistema do cliente de propósito, porque o preço muda conforme
    o ramo. A troca passa por aqui, que é o caminho do suporte. */
