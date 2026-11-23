@@ -310,7 +310,7 @@ function linhaConta(r){const d=r.dias_restantes;
   :d<=3?`<span class="selo warn">${d} dia${d===1?'':'s'}</span>`:`<span class="selo">${d} dias</span>`);
  const doc=r.documento||r.cpf_responsavel||r.cnpj||'';
  return `<div class="rec">
-  <div class="e"><b>${esc(r.nome||'sem nome')}</b> <span class="selo ${r.sistema==='BlackFlow'?'bf':'lx'}">${esc(r.sistema)}</span>${r.pedido_prazo?' <span class="selo warn">pediu prazo</span>':''}
+  <div class="e"><b>${esc(r.nome||'sem nome')}</b> <span class="selo ${r.sistema==='BlackFlow'?'bf':'lx'}">${esc(r.sistema)}</span>${r.assinante_num?` <span class="selo" title="Posição na ordem de contratação">nº ${String(r.assinante_num).padStart(3,'0')}${r.assinante_num<=100?' · 100 primeiros':''}</span>`:''}${r.pedido_prazo?' <span class="selo warn">pediu prazo</span>':''}
    <br><small class="sub">${esc(r.email||'sem e-mail')}${r.criado_em?' · entrou em '+br(r.criado_em):''}</small>
    ${r.razao_social?`<br><small class="sub">${esc(r.razao_social)}</small>`:''}
    ${doc?`<br><small class="sub mono">${esc(mascDoc(doc))}</small>`:''}
