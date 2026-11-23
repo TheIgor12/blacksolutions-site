@@ -76,7 +76,7 @@ input:focus,select:focus{outline:0;border-color:var(--v1)}
 const SB=supabase.createClient('https://blszdbjpxgtloblxlusr.supabase.co','sb_publishable_0Tns_mDN2N1iQmw_sEzFXw_SRMy1uXK');
 const P={sessao:null,mestre:null,aba:'resumo',msg:'',erro:false,carregando:false,email:'',
  resumo:null,contas:null,conect:null,audit:null,pagtos:null,ident:null,
- auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos',promo:null};
+ auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos',promo:null,cobranca:null};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number(v||0);
@@ -141,11 +141,11 @@ let ociosoT=null;
 function marcarUso(){clearTimeout(ociosoT);if(P.sessao)ociosoT=setTimeout(()=>{toast('Sessão encerrada por inatividade.');sair()},20*60000)}
 ['click','keydown','mousemove','touchstart'].forEach(e=>document.addEventListener(e,marcarUso,{passive:true}));
 async function sair(){try{await SB.auth.signOut()}catch(e){}P.sessao=null;P.mestre=null;P.aal=null;P.mfa=null;
- P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=P.usuarios=P.hist=null;render()}
+ P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=P.usuarios=P.hist=P.cobranca=null;render()}
 
 /* ---------- carregamento por aba ---------- */
 async function carregar(aba,forcar){P.aba=aba;
- const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident,promocao:P.promo}[aba];
+ const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident,promocao:P.promo,cobranca:P.cobranca}[aba];
  if(ja!==null&&ja!==undefined&&!forcar){render();return}
  P.carregando=true;render();
  try{
@@ -160,6 +160,7 @@ async function carregar(aba,forcar){P.aba=aba;
   if(aba==='auditoria'){const d=await SB.rpc('bs_auditoria',{p_escritorio:null,p_dias:P.auditDias,p_limite:300});P.audit=d.error?{erro:erroSql(d.error)}:(d.data||[])}
   if(aba==='pagamentos'){const e=await SB.rpc('bs_pagamentos_pendentes');P.pagtos=e.error?{erro:erroSql(e.error)}:(e.data||[])}
   if(aba==='promocao'){const g=await SB.rpc('bs_promocao_painel');P.promo=g.error?{erro:erroSql(g.error)}:(g.data||[])}
+  if(aba==='cobranca'){const c=await SB.rpc('bs_pagamento_situacao');P.cobranca=c.error?{erro:erroSql(c.error)}:(c.data||{})}
   if(aba==='identidades'){const f=await SB.from('bs_identidades').select('*').order('criado_em',{ascending:false}).limit(300);
    P.ident=f.error?{erro:erroSql(f.error)}:(f.data||[])}
  }catch(e){toast(erroSql(e))}
@@ -240,7 +241,8 @@ function cabecalho(){const e=(P.sessao&&P.sessao.user&&P.sessao.user.email)||'';
  </div></header>`}
 function abas(){const L=[['resumo','Resumo'],['usuarios','Usuários',Array.isArray(P.usuarios)&&P.usuarios.length],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
   ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length],
-  ['promocao','Black Friday',Array.isArray(P.promo)&&P.promo.length]];
+  ['promocao','Black Friday',Array.isArray(P.promo)&&P.promo.length],
+  ['cobranca','Cobrança']];
  return `<div class="abas">${L.map(([k,t,q])=>`<button class="aba ${P.aba===k?'on':''}" onclick="carregar('${k}')">${t}${q?`<span class="n">${q}</span>`:''}</button>`).join('')}</div>`}
 function caixaErro(o){return `<div class="aviso bad">${esc(o.erro)}</div>`}
 function vResumo(){const R=P.resumo;
@@ -442,7 +444,42 @@ function vPromocao(){const L=P.promo;
   <div class="aviso neutro">Quem cobra é o Asaas. Esta tela controla o prazo e avisa; a troca do valor cobrado continua sendo feita por você, na assinatura do cliente dentro do Asaas.</div>
   ${L.length?L.map(linhaPromo).join(''):'<p class="vazio">Ninguém na promoção ainda.</p>'}
   <div style="margin-top:14px"><button class="btn3" onclick="carregar('promocao',true)">Atualizar</button></div></div>`}
-function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao}[P.aba]||vResumo;
+/* ---------- Cobrança: a chave do prestador fica aqui, não no painel do banco ----------
+   A chave é gravada por uma função que só aceita o acesso mestre, e volta
+   apenas com os últimos caracteres, para conferência. A tabela é fechada por
+   RLS: quem lê é o servidor, dentro das funções de borda. */
+async function cobrancaGravar(){
+ const i=document.getElementById('cb_chave'),b=document.getElementById('cb_base');
+ const chave=String(i&&i.value||'').trim();
+ if(chave.length<20){toast('A chave informada é curta demais.');return}
+ const r=await SB.rpc('bs_pagamento_gravar',{p_chave:chave,p_base:String(b&&b.value||'').trim()||null});
+ if(i)i.value='';
+ if(r.error){toast(erroSql(r.error));return}
+ toast('Chave gravada. Final '+((r.data&&r.data.final)||'')+'.');
+ carregar('cobranca',true);
+}
+async function cobrancaApagar(){
+ if(!confirm('Apagar a chave gravada? A cobrança dentro do sistema para de funcionar até você gravar outra.'))return;
+ const r=await SB.rpc('bs_pagamento_apagar');
+ if(r.error){toast(erroSql(r.error));return}
+ toast('Chave apagada.');carregar('cobranca',true);
+}
+function vCobranca(){const C=P.cobranca;
+ if(!C)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(C.erro)return '<div class="painel"><h2>Cobrança</h2>'+caixaErro(C)+'</div>';
+ const tem=!!C.tem;
+ return `<div class="painel"><h2>Cobrança</h2>
+ <p class="sub">A chave da conta do prestador de pagamento fica guardada aqui, fechada a todos menos ao servidor. Com ela gravada, o BlackFlow passa a fechar assinatura por Pix e cartão dentro do próprio sistema.</p>
+ <div class="aviso ${tem?'ok':'bad'}" style="margin:12px 0">${tem?('Chave gravada, final '+esc(C.final||'')+(C.em?', em '+esc(String(C.em).slice(0,10).split('-').reverse().join('/')):'')+'.'):'Nenhuma chave gravada. A cobrança dentro do sistema está desligada.'}</div>
+ <label style="display:block;margin:0 0 6px;font-weight:700">Chave de API do prestador</label>
+ <input id="cb_chave" type="password" autocomplete="off" placeholder="Cole aqui a chave de produção" style="width:100%;max-width:560px">
+ <label style="display:block;margin:12px 0 6px;font-weight:700">Endereço da API</label>
+ <input id="cb_base" value="${esc(C.base||'https://api.asaas.com/v3')}" style="width:100%;max-width:560px">
+ <p class="sub" style="margin:8px 0 14px">Deixe como está para produção. Para testar com dinheiro falso, use o endereço de testes do prestador e uma chave de testes.</p>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt" onclick="cobrancaGravar()">Gravar chave</button>${tem?'<button class="bt gh" onclick="cobrancaApagar()">Apagar chave</button>':''}</div>
+ <p class="sub" style="margin:14px 0 0">A chave nunca volta inteira para esta tela, nem para o aplicativo. Se precisar trocar, grave a nova por cima.</p>
+ </div>`}
+function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao,cobranca:vCobranca}[P.aba]||vResumo;
  return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
 function render(){
  if(!P.sessao){$('#app').innerHTML=vLogin();const f=$(P.email?'#l_senha':'#l_email');if(f)f.focus();return}
