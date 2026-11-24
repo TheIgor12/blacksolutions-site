@@ -76,7 +76,7 @@ input:focus,select:focus{outline:0;border-color:var(--v1)}
 const SB=supabase.createClient('https://blszdbjpxgtloblxlusr.supabase.co','sb_publishable_0Tns_mDN2N1iQmw_sEzFXw_SRMy1uXK');
 const P={sessao:null,mestre:null,aba:'resumo',msg:'',erro:false,carregando:false,email:'',
  resumo:null,contas:null,conect:null,audit:null,pagtos:null,ident:null,
- auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos',promo:null,cobranca:null};
+ auditDias:30,busca:'',aal:null,mfa:null,usuarios:null,hist:null,filtroU:'todos',promo:null,cobranca:null,fiscal:null};
 const $=s=>document.querySelector(s);
 const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const n=v=>Number(v||0);
@@ -141,11 +141,11 @@ let ociosoT=null;
 function marcarUso(){clearTimeout(ociosoT);if(P.sessao)ociosoT=setTimeout(()=>{toast('Sessão encerrada por inatividade.');sair()},20*60000)}
 ['click','keydown','mousemove','touchstart'].forEach(e=>document.addEventListener(e,marcarUso,{passive:true}));
 async function sair(){try{await SB.auth.signOut()}catch(e){}P.sessao=null;P.mestre=null;P.aal=null;P.mfa=null;
- P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=P.usuarios=P.hist=P.cobranca=null;render()}
+ P.resumo=P.contas=P.conect=P.audit=P.pagtos=P.ident=P.usuarios=P.hist=P.cobranca=P.fiscal=null;render()}
 
 /* ---------- carregamento por aba ---------- */
 async function carregar(aba,forcar){P.aba=aba;
- const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident,promocao:P.promo,cobranca:P.cobranca}[aba];
+ const ja={resumo:P.resumo,usuarios:P.usuarios,contas:P.contas,conectados:P.conect,auditoria:P.audit,pagamentos:P.pagtos,identidades:P.ident,promocao:P.promo,cobranca:P.cobranca,fiscal:P.fiscal}[aba];
  if(ja!==null&&ja!==undefined&&!forcar){render();return}
  P.carregando=true;render();
  try{
@@ -161,6 +161,7 @@ async function carregar(aba,forcar){P.aba=aba;
   if(aba==='pagamentos'){const e=await SB.rpc('bs_pagamentos_pendentes');P.pagtos=e.error?{erro:erroSql(e.error)}:(e.data||[])}
   if(aba==='promocao'){const g=await SB.rpc('bs_promocao_painel');P.promo=g.error?{erro:erroSql(g.error)}:(g.data||[])}
   if(aba==='cobranca'){const c=await SB.rpc('bs_pagamento_situacao');P.cobranca=c.error?{erro:erroSql(c.error)}:(c.data||{})}
+  if(aba==='fiscal'){const f=await SB.rpc('bs_fiscal_situacao');P.fiscal=f.error?{erro:erroSql(f.error)}:(f.data||{})}
   if(aba==='identidades'){const f=await SB.from('bs_identidades').select('*').order('criado_em',{ascending:false}).limit(300);
    P.ident=f.error?{erro:erroSql(f.error)}:(f.data||[])}
  }catch(e){toast(erroSql(e))}
@@ -242,7 +243,7 @@ function cabecalho(){const e=(P.sessao&&P.sessao.user&&P.sessao.user.email)||'';
 function abas(){const L=[['resumo','Resumo'],['usuarios','Usuários',Array.isArray(P.usuarios)&&P.usuarios.length],['contas','Contas',P.contas&&P.contas.length],['conectados','Conectados',P.conect&&P.conect.filter(x=>x.online).length],
   ['auditoria','Auditoria'],['pagamentos','Pagamentos',P.pagtos&&P.pagtos.length],['identidades','Documentos',P.ident&&P.ident.length],
   ['promocao','Black Friday',Array.isArray(P.promo)&&P.promo.length],
-  ['cobranca','Cobrança']];
+  ['cobranca','Cobrança'],['fiscal','Fiscal']];
  return `<div class="abas">${L.map(([k,t,q])=>`<button class="aba ${P.aba===k?'on':''}" onclick="carregar('${k}')">${t}${q?`<span class="n">${q}</span>`:''}</button>`).join('')}</div>`}
 function caixaErro(o){return `<div class="aviso bad">${esc(o.erro)}</div>`}
 function vResumo(){const R=P.resumo;
@@ -479,7 +480,41 @@ function vCobranca(){const C=P.cobranca;
  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt" onclick="cobrancaGravar()">Gravar chave</button>${tem?'<button class="bt gh" onclick="cobrancaApagar()">Apagar chave</button>':''}</div>
  <p class="sub" style="margin:14px 0 0">A chave nunca volta inteira para esta tela, nem para o aplicativo. Se precisar trocar, grave a nova por cima.</p>
  </div>`}
-function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao,cobranca:vCobranca}[P.aba]||vResumo;
+/* ---------- Fiscal: a chave do integrador que emite a NFS-e ---------- */
+async function fiscalGravar(){
+ const t=document.getElementById('fs_token'),i=document.getElementById('fs_integrador'),a=document.getElementById('fs_ambiente');
+ const token=String(t&&t.value||'').trim();
+ if(token.length<16){toast('O token informado é curto demais.');return}
+ const r=await SB.rpc('bs_fiscal_gravar',{p_token:token,p_integrador:(i&&i.value)||'focusnfe',p_ambiente:(a&&a.value)||'homologacao'});
+ if(t)t.value='';
+ if(r.error){toast(erroSql(r.error));return}
+ toast('Token fiscal gravado. Final '+((r.data&&r.data.final)||'')+'.');
+ carregar('fiscal',true);
+}
+async function fiscalApagar(){
+ if(!confirm('Apagar o token fiscal? A emissão de NFS-e para de funcionar até você gravar outro.'))return;
+ const r=await SB.rpc('bs_fiscal_apagar');
+ if(r.error){toast(erroSql(r.error));return}
+ toast('Token apagado.');carregar('fiscal',true);
+}
+function vFiscal(){const F=P.fiscal;
+ if(!F)return '<div class="painel"><p class="sub">Carregando...</p></div>';
+ if(F.erro)return '<div class="painel"><h2>Fiscal</h2>'+caixaErro(F)+'</div>';
+ const tem=!!F.tem,prod=F.ambiente==='producao';
+ const sel=(id,opts,v)=>'<select id="'+id+'" style="width:100%;max-width:560px">'+opts.map(([k,n])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select>';
+ return `<div class="painel"><h2>Fiscal</h2>
+ <p class="sub">A emissão de NFS-e passa por um integrador homologado, que já tem certificado, assinatura em ICP-Brasil e credenciamento nos municípios. A chave dele fica guardada aqui, fechada a todos menos ao servidor.</p>
+ <div class="aviso ${tem?(prod?'ok':'bad'):'bad'}" style="margin:12px 0">${tem?('Token gravado, final '+esc(F.final||'')+', integrador '+esc(F.integrador||'')+', ambiente '+(prod?'<b>produção</b>':'<b>homologação</b>, sem validade fiscal')+'.'):'Nenhum token gravado. A emissão de NFS-e está bloqueada em todas as contas.'}</div>
+ <label style="display:block;margin:0 0 6px;font-weight:700">Integrador</label>
+ ${sel('fs_integrador',[['focusnfe','Focus NFe']],F.integrador||'focusnfe')}
+ <label style="display:block;margin:12px 0 6px;font-weight:700">Token de API</label>
+ <input id="fs_token" type="password" autocomplete="off" placeholder="Cole aqui o token do integrador" style="width:100%;max-width:560px">
+ <label style="display:block;margin:12px 0 6px;font-weight:700">Ambiente</label>
+ ${sel('fs_ambiente',[['homologacao','Homologação — para testar, sem validade fiscal'],['producao','Produção — nota com validade fiscal']],F.ambiente||'homologacao')}
+ <p class="sub" style="margin:8px 0 14px">Comece em homologação, emita uma nota de teste de ponta a ponta e só então troque para produção. Cada CNPJ de cliente precisa ter o certificado digital cadastrado no painel do integrador antes da primeira nota.</p>
+ <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt" onclick="fiscalGravar()">Gravar token</button>${tem?'<button class="bt gh" onclick="fiscalApagar()">Apagar token</button>':''}</div>
+ </div>`}
+function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao,cobranca:vCobranca,fiscal:vFiscal}[P.aba]||vResumo;
  return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
 function render(){
  if(!P.sessao){$('#app').innerHTML=vLogin();const f=$(P.email?'#l_senha':'#l_email');if(f)f.focus();return}
