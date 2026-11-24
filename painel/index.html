@@ -471,7 +471,7 @@ function vCobranca(){const C=P.cobranca;
  const tem=!!C.tem;
  return `<div class="painel"><h2>Cobrança</h2>
  <p class="sub">A chave da conta do prestador de pagamento fica guardada aqui, fechada a todos menos ao servidor. Com ela gravada, o BlackFlow passa a fechar assinatura por Pix e cartão dentro do próprio sistema.</p>
- <div class="aviso ${tem?'ok':'bad'}" style="margin:12px 0">${tem?('Chave gravada, final '+esc(C.final||'')+(C.em?', em '+esc(String(C.em).slice(0,10).split('-').reverse().join('/')):'')+'.'):'Nenhuma chave gravada. A cobrança dentro do sistema está desligada.'}</div>
+ <div class="aviso ${tem?'ok':'bad'}" style="margin:12px 0">${tem?('Chave gravada, final '+esc(C.final||'')+(C.em?', em '+esc(String(C.em).slice(0,10).split('-').reverse().join('/')):'')+'.'):'Nenhuma chave gravada <b>nesta tela</b>. Se a chave estiver como segredo do projeto, com o nome ASAAS_CHAVE, a cobrança já está ligada e esta tela não tem como enxergar: o segredo é lido só pelo servidor. Confira em Supabase, Edge Functions, Secrets. Grave aqui apenas se quiser trocar a chave sem mexer no Supabase.'}</div>
  <label style="display:block;margin:0 0 6px;font-weight:700">Chave de API do prestador</label>
  <input id="cb_chave" type="password" autocomplete="off" placeholder="Cole aqui a chave de produção" style="width:100%;max-width:560px">
  <label style="display:block;margin:12px 0 6px;font-weight:700">Endereço da API</label>
@@ -504,7 +504,7 @@ function vFiscal(){const F=P.fiscal;
  const sel=(id,opts,v)=>'<select id="'+id+'" style="width:100%;max-width:560px">'+opts.map(([k,n])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select>';
  return `<div class="painel"><h2>Fiscal</h2>
  <p class="sub">A emissão de NFS-e passa por um integrador homologado, que já tem certificado, assinatura em ICP-Brasil e credenciamento nos municípios. A chave dele fica guardada aqui, fechada a todos menos ao servidor.</p>
- <div class="aviso ${tem?(prod?'ok':'bad'):'bad'}" style="margin:12px 0">${tem?('Token gravado, final '+esc(F.final||'')+', integrador '+esc(F.integrador||'')+', ambiente '+(prod?'<b>produção</b>':'<b>homologação</b>, sem validade fiscal')+'.'):'Nenhum token gravado. A emissão de NFS-e está bloqueada em todas as contas.'}</div>
+ <div class="aviso ${tem?(prod?'ok':'bad'):'bad'}" style="margin:12px 0">${tem?('Token gravado, final '+esc(F.final||'')+', integrador '+esc(F.integrador||'')+', ambiente '+(prod?'<b>produção</b>':'<b>homologação</b>, sem validade fiscal')+'.'):'Nenhum token gravado <b>nesta tela</b>. Se o token estiver como segredo do projeto, com o nome FOCUS_TOKEN, a emissão já está ligada e esta tela não enxerga. Confira em Supabase, Edge Functions, Secrets.'}</div>
  <label style="display:block;margin:0 0 6px;font-weight:700">Integrador</label>
  ${sel('fs_integrador',[['focusnfe','Focus NFe']],F.integrador||'focusnfe')}
  <label style="display:block;margin:12px 0 6px;font-weight:700">Token de API</label>
