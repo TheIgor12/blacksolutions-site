@@ -500,20 +500,15 @@ async function fiscalApagar(){
 function vFiscal(){const F=P.fiscal;
  if(!F)return '<div class="painel"><p class="sub">Carregando...</p></div>';
  if(F.erro)return '<div class="painel"><h2>Fiscal</h2>'+caixaErro(F)+'</div>';
- const tem=!!F.tem,prod=F.ambiente==='producao';
- const sel=(id,opts,v)=>'<select id="'+id+'" style="width:100%;max-width:560px">'+opts.map(([k,n])=>'<option value="'+k+'"'+(k===v?' selected':'')+'>'+esc(n)+'</option>').join('')+'</select>';
+ const tem=!!F.tem;
  return `<div class="painel"><h2>Fiscal</h2>
- <p class="sub">A emissão de NFS-e passa por um integrador homologado, que já tem certificado, assinatura em ICP-Brasil e credenciamento nos municípios. A chave dele fica guardada aqui, fechada a todos menos ao servidor.</p>
- <div class="aviso ${tem?(prod?'ok':'bad'):'bad'}" style="margin:12px 0">${tem?('Token gravado, final '+esc(F.final||'')+', integrador '+esc(F.integrador||'')+', ambiente '+(prod?'<b>produção</b>':'<b>homologação</b>, sem validade fiscal')+'.'):'Nenhum token gravado <b>nesta tela</b>. Se o token estiver como segredo do projeto, com o nome FOCUS_TOKEN, a emissão já está ligada e esta tela não enxerga. Confira em Supabase, Edge Functions, Secrets.'}</div>
- <label style="display:block;margin:0 0 6px;font-weight:700">Integrador</label>
- ${sel('fs_integrador',[['focusnfe','Focus NFe']],F.integrador||'focusnfe')}
- <label style="display:block;margin:12px 0 6px;font-weight:700">Token de API</label>
- <input id="fs_token" type="password" autocomplete="off" placeholder="Cole aqui o token do integrador" style="width:100%;max-width:560px">
- <label style="display:block;margin:12px 0 6px;font-weight:700">Ambiente</label>
- ${sel('fs_ambiente',[['homologacao','Homologação — para testar, sem validade fiscal'],['producao','Produção — nota com validade fiscal']],F.ambiente||'homologacao')}
- <p class="sub" style="margin:8px 0 14px">Comece em homologação, emita uma nota de teste de ponta a ponta e só então troque para produção. Cada CNPJ de cliente precisa ter o certificado digital cadastrado no painel do integrador antes da primeira nota.</p>
- <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt" onclick="fiscalGravar()">Gravar token</button>${tem?'<button class="bt gh" onclick="fiscalApagar()">Apagar token</button>':''}</div>
+ <div class="aviso bad" style="margin:0 0 12px"><b>Esta tela saiu de uso na versão 1.47.0.</b> O token gravado aqui não emite mais nota nenhuma.</div>
+ <p class="sub">A nota fiscal sai com o CNPJ da clínica que prestou o serviço, assinada pelo certificado digital dela. No integrador, quem emite é o token da empresa, criado quando aquele CNPJ e aquele certificado são cadastrados lá. Logo, um token único para todo o sistema não serve: serviria apenas se todas as notas saíssem com o mesmo CNPJ, que é exatamente o que não pode acontecer.</p>
+ <p class="sub">Desde a versão 1.47.0 cada clínica grava o token dela dentro do próprio BlackFlow, em Configurações, Cadastro fiscal, e só o administrador daquela conta consegue gravar. O token fica em tabela fechada, lida apenas pelo servidor que emite a nota. A BlackSolutions não guarda token de cliente nesta tela e não emite nota no lugar de ninguém.</p>
+ <p class="sub">A BlackSolutions, para as notas das assinaturas dela, também grava o token dela desse mesmo jeito, na conta dela dentro do sistema.</p>
+ ${tem?'<div class="aviso bad" style="margin:12px 0">Ainda existe um token antigo gravado aqui, final '+esc(F.final||'')+'. Ele não é usado por nada. Apague.</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt gh" onclick="fiscalApagar()">Apagar o token antigo</button></div>':'<div class="aviso ok" style="margin:12px 0">Nenhum token antigo gravado aqui. Nada a fazer nesta tela.</div>'}
  </div>`}
+
 function vPainel(){const V={resumo:vResumo,usuarios:vUsuarios,contas:vContas,conectados:vConectados,auditoria:vAuditoria,pagamentos:vPagamentos,identidades:vIdentidades,promocao:vPromocao,cobranca:vCobranca,fiscal:vFiscal}[P.aba]||vResumo;
  return cabecalho()+`<main class="w">${abas()}${V()}</main>`}
 function render(){
